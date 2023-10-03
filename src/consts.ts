@@ -1,0 +1,1 @@
+export const MANIFAST_URL = "https://ton.vote/tonconnect-manifest.json";
