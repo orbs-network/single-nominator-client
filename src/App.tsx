@@ -1,14 +1,19 @@
-import { useState } from 'react'
-import { TonConnectButton, useTonAddress } from "@tonconnect/ui-react";
-
+import { Navbar } from "components";
+import { Layout } from "styles";
+import { Outlet } from "react-router-dom";
+import styled from "styled-components";
 
 function App() {
-
   return (
-    <>
-      <TonConnectButton />
-    </>
-  )
+    <StyledApp>
+      <Navbar />
+      <Outlet />
+    </StyledApp>
+  );
 }
 
-export default App
+export default App;
+
+const StyledApp = styled(Layout)`
+  padding-top: 80px;
+`;
