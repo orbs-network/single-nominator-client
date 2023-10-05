@@ -1,20 +1,22 @@
 import React, { ReactNode } from "react";
 import styled from "styled-components";
+import { H1 } from "styles";
 
 export function Page({
   title,
   children,
 }: {
-  title: string;
+  title?: string;
   children: ReactNode;
 }) {
   return (
     <StyledPage>
-      <h1>{title}</h1>
+      {title && <H1>{title}</H1>}
       {children}
     </StyledPage>
   );
 }
+
 
 const StyledPage = styled.div`
 display: flex;

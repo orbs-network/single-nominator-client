@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { ControllerRenderProps, FieldValues } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
+import { Typography } from "styles";
 
 interface Props {
   placeholder?: string;
@@ -12,7 +13,6 @@ interface Props {
   suffix?: string;
 }
 
-
 export function Input({
   placeholder,
   error,
@@ -23,7 +23,7 @@ export function Input({
   suffix,
 }: Props) {
   return (
-    <StyledContainer>
+    <StyledContainer $error={!!error}>
       {label && <Label>{label}</Label>}
 
       {type === "number" ? (
@@ -47,20 +47,34 @@ export function Input({
   );
 }
 
-const Label = styled.p``;
+const Label = styled(Typography)`
+  margin-bottom: 10px;
+  font-size: 15px;
+  font-weight: 500;
+`;
 
-const Error = styled.p``;
+const Error = styled.p`
+  color: red;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 5px;
+`;
 
-
-const StyledContainer = styled.div`
+const StyledContainer = styled.div<{ $error: boolean }>`
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
   & > input {
-    border: 1px solid rgba(0, 0, 0, 0.23);
-    outline: none;
+    background-color: ${({ theme }) => theme.colors.container};
+    border: 1px solid
+      ${({ $error, theme }) =>
+        $error
+          ? "red"
+          : theme.dark
+          ? theme.colors.border
+          : "rgba(0, 0, 0, 0.23)"};
     width: 100%;
+    outline: none;
     border-radius: 10px;
     text-indent: 10px;
     height: 48px;

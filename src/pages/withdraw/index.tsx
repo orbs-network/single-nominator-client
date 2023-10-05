@@ -1,45 +1,43 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, Input, Page } from "components";
 import React from "react";
 import { ColumnFlex, Container } from "styles";
 import { useForm, Controller } from "react-hook-form";
-import { isTonAddress } from "utils";
+import { isTonAddress, parseFormInputError } from "utils";
+import {  useWithdrawTx } from "hooks";
 
 const inputs = [
   {
     label: "Single nominator address",
-    name: "single-nominator-address",
+    name: "address",
     validate: isTonAddress,
     error: "Invalid address",
-    type: "text",
-    defaultValue: "",
-  },
-  {
-    label: "Amount",
-    name: "amount",
-    type: "number",
-    suffix: "TON",
   },
 ];
 
-export function WithdrawPage() {
+type FormValues = {
+  address: string;
+};
+
+
+function WithdrawPage() {
   const {
     handleSubmit,
     formState: { errors },
     control,
   } = useForm({
-    reValidateMode: "onBlur",
- 
+    mode: "onSubmit",
+    reValidateMode: "onChange",
   });
 
-  const onSubmit = () => {};
+  const { mutate, isLoading } = useWithdrawTx();
 
-  console.log('render');
-  
+  const onSubmit = (data: FormValues) => mutate({ address: data.address });
 
   return (
     <Page title="Withdraw">
       <Container>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit((data) => onSubmit(data as FormValues))}>
           <ColumnFlex $gap={30}>
             {inputs.map((input) => {
               return (
@@ -49,13 +47,17 @@ export function WithdrawPage() {
                   key={input.name}
                   rules={{ required: true, validate: input.validate }}
                   render={({ field }) => {
+                    const error = errors[input.name];
+                    const errorMsg = parseFormInputError(
+                      error?.type,
+                      input.error
+                    );
+
                     return (
                       <Input
-                      suffix={input.suffix}
-                        type={input.type}
                         label={input.label}
-                        field={field}
-                        error={errors[input.name] ? input.error : undefined}
+                        field={field as any}
+                        error={errorMsg}
                       />
                     );
                   }}
@@ -63,10 +65,15 @@ export function WithdrawPage() {
               );
             })}
 
-            <Button type="submit">Submit</Button>
+            <Button connectionRequired isLoading={isLoading} type="submit">
+              Proceed
+            </Button>
           </ColumnFlex>
         </form>
       </Container>
     </Page>
   );
 }
+
+
+export default WithdrawPage;
