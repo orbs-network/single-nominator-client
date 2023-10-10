@@ -38,4 +38,5 @@ export default App;
 
 const StyledApp = styled(Layout)`
   padding-top: 100px;
+  padding-bottom: 70px;
 `;
