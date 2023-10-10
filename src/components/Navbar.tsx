@@ -67,7 +67,7 @@ export function Navbar() {
       <NavContent>
         <Logo to="/">
           <img src={LogoImg} />
-          <p>TON.Validators</p>
+          <p>TON.Validator</p>
         </Logo>
         <RowFlex>
           <TonConnectButton />
