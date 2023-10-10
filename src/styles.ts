@@ -1,15 +1,22 @@
+import { Button } from "components";
 import { createGlobalStyle, styled } from "styled-components";
 
-
+export const MOBILE_MEDIA_QUERY = "@media (max-width: 768px)";
 
 export const GlobalStyle = createGlobalStyle`
   body {
     background: ${({ theme }) => theme.colors.body};
   }
-`
+    ${MOBILE_MEDIA_QUERY}  {
+      tc-root  {
+        right: 10px;
+        left: unset!important;
+      },
+    },
+`;
 
 export const Layout = styled.div`
-  max-width: 770px;
+  max-width: 820px;
   margin: 0 auto;
   width: calc(100% - 40px);
 `;
@@ -46,17 +53,30 @@ export const Typography = styled.p`
   color: ${({ theme }) => theme.text.color};
 `;
 
-
 export const H1 = styled(Typography)`
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
+  color: ${({ theme }) => theme.dark ? "#fff" : "#000"};
+  ${MOBILE_MEDIA_QUERY} {
+    font-size: 18px;
+  }
 `;
 
-
 export const RowFlex = styled.div<{ $gap?: number }>`
-
   display: flex;
   flex-direction: row;
   gap: ${({ $gap }) => `${$gap || 10}px`};
-align-items: center;
-`
+  align-items: center;
+`;
+
+export const InputsContainer = styled(ColumnFlex)`
+  gap: 20px;
+`;
+
+export const SubmitButton = styled(Button)`
+  width: fit-content;
+  min-width: 200px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20px;
+`;

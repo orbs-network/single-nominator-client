@@ -1,4 +1,4 @@
-import { Navbar } from "components";
+import { Navbar} from "components";
 import { Layout } from "styles";
 import { Outlet } from "react-router-dom";
 import styled from "styled-components";
@@ -26,6 +26,16 @@ function App() {
 
 export default App;
 
+
+// const RouteLoader = () => {
+//   return <StyledSkeleton />;
+// }
+
+// const StyledSkeleton = styled(Skeleton)`
+//   width: 100%;
+//   height: 300px;
+// `
+
 const StyledApp = styled(Layout)`
-  padding-top: 80px;
+  padding-top: 100px;
 `;

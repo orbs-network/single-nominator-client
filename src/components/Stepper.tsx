@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 import { BsCheckLg } from "react-icons/bs";
 
 import styled from "styled-components";
-import { Container, Typography } from "styles";
+import { Container, MOBILE_MEDIA_QUERY, Typography } from "styles";
 
 interface ISteps {
   title: string;
@@ -22,7 +22,7 @@ export function Stepper({ steps, currentStep, header }: Props) {
     <StyledContainer>
       <Menu>
         {header}
-        <Steps>
+        <MenuSteps>
           <Line />
           {steps.map((step, index) => {
             if (!step.title) return null;
@@ -38,7 +38,7 @@ export function Stepper({ steps, currentStep, header }: Props) {
               </Step>
             );
           })}
-        </Steps>
+        </MenuSteps>
       </Menu>
 
       <StepComponent>{Component}</StepComponent>
@@ -50,10 +50,16 @@ export function Stepper({ steps, currentStep, header }: Props) {
 const Menu = styled(Container)`
   width: 250px;
   padding: 20px 10px 20px 20px;
+  ${MOBILE_MEDIA_QUERY} {
+    width: 100%;
+  }
 `;
 
 const StepComponent = styled.div`
   flex: 1;
+  ${MOBILE_MEDIA_QUERY} {
+    width: 100%;
+  }
 `;
 
 const Line = styled.figure`
@@ -77,12 +83,15 @@ const Dot = styled.div`
    background: ${({ theme }) => theme.colors.blue};
 `;
 
-const Steps = styled.div`
+const MenuSteps = styled.div`
   display: flex;
   flex-direction: column;
   gap: 30px;
   align-items: flex-start;
   position: relative;
+  ${MOBILE_MEDIA_QUERY} {
+    gap: 16px;
+  }
 `;
 
 const Indicator = styled.div<{ $done: boolean }>`
@@ -91,11 +100,14 @@ const Indicator = styled.div<{ $done: boolean }>`
   height: 34px;
   border-radius: 50%;
   border: 2px solid ${({ theme }) => theme.colors.blue};
-  background: ${({ $done, theme }) => ($done ? theme.colors.blue : theme.colors.container)};
+  background: ${({ $done, theme }) =>
+    $done ? theme.colors.blue : theme.colors.container};
   display: flex;
-
   align-items: center;
   justify-content: center;
+  ${MOBILE_MEDIA_QUERY} {
+    gap: 16px;
+  }
 `;
 
 const Step = styled.div`
@@ -106,12 +118,13 @@ const Step = styled.div`
   width: auto;
   flex: 1;
   align-items: center;
- 
-   & p {
+
+  & p {
     font-size: 14px;
     line-height: 20px;
-    flex:1;
+    flex: 1;
   }
+ 
 `;
 
 const StyledContainer = styled.div`
@@ -119,4 +132,7 @@ const StyledContainer = styled.div`
   gap: 20px;
   align-items: flex-start;
   width: 100%;
+  ${MOBILE_MEDIA_QUERY} {
+    flex-direction: column;
+  }
 `;

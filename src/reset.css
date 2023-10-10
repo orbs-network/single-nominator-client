@@ -171,10 +171,22 @@ table {
   src: url("./assets/font/Mulish-Bold.ttf"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
+/* mulish-700 - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: "Mulish";
+  font-style: normal;
+  font-weight: 800;
+  src: url("./assets/font/Mulish-ExtraBold.ttf"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
 /* body {
   background: #f8f9fb;
 } */
 * {
+  font-family: "Mulish";
+}
+#ton-connect-button * {
   font-family: "Mulish";
 }
 
@@ -186,3 +198,5 @@ table {
   border: unset;
   font-size: 14px;
 }
+
+

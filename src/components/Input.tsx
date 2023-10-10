@@ -25,7 +25,6 @@ export function Input({
   return (
     <StyledContainer $error={!!error}>
       {label && <Label>{label}</Label>}
-
       {type === "number" ? (
         <NumericFormat
           value={field.value || ""}
@@ -50,7 +49,7 @@ export function Input({
 const Label = styled(Typography)`
   margin-bottom: 10px;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
 `;
 
 const Error = styled.p`

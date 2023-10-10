@@ -1,5 +1,5 @@
-import { Address, Button, Input, Page, Stepper } from "components";
-import { ColumnFlex, Container } from "styles";
+import { Address, Input, Page, Stepper } from "components";
+import { Container, InputsContainer, SubmitButton } from "styles";
 import { parseFormInputError } from "utils";
 import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
@@ -22,7 +22,7 @@ const FirstStep = () => {
       <form
         onSubmit={handleSubmit((data) => setFromValues(data as FormValues))}
       >
-        <ColumnFlex $gap={30}>
+        <InputsContainer>
           {inputs.map((input) => {
             return (
               <Controller
@@ -43,11 +43,11 @@ const FirstStep = () => {
             );
           })}
           {step === Steps.First && (
-            <Submit connectionRequired type="submit">
+            <SubmitButton connectionRequired type="submit">
               Proceed
-            </Submit>
+            </SubmitButton>
           )}
-        </ColumnFlex>
+        </InputsContainer>
       </form>
     </Step>
   );
@@ -71,9 +71,9 @@ const SecondStep = () => {
       <AddressDisplay label="From owner:" address={ownerAddress} />
       <AddressDisplay label="To single nominator:" address={snAddress} />
       {step === Steps.Second && (
-        <Submit isLoading={isLoading} onClick={onSubmit}>
+        <SubmitButton isLoading={isLoading} onClick={onSubmit}>
           Proceed
-        </Submit>
+        </SubmitButton>
       )}
     </StyledStep2>
   );
@@ -94,9 +94,9 @@ const ThirdStep = () => {
     <Step>
       <StepTitle>Withrdaw 1 TON to owner</StepTitle>
       <AddressDisplay label="Owner:" address={ownerAddress} />
-      <Submit onClick={onSubmit} isLoading={isLoading}>
+      <SubmitButton onClick={onSubmit} isLoading={isLoading}>
         Proceed
-      </Submit>
+      </SubmitButton>
     </Step>
   );
 };
@@ -142,12 +142,6 @@ const steps = [
 
 export default DeploySingleNominatorPage;
 
-const Submit = styled(Button)`
-  max-width: 200px;
-  margin: 0 auto;
-  width: 100%;
-  margin-top: 20px;
-`;
 
 const Step = styled(Container)<{ $disabled?: boolean }>`
   opacity: ${({ $disabled }) => ($disabled ? 0.5 : 1)};

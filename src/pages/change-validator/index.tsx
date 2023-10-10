@@ -1,6 +1,6 @@
 import { Button, Input, Page } from "components";
 import React from "react";
-import { ColumnFlex, Container } from "styles";
+import { ColumnFlex, Container, SubmitButton } from "styles";
 import { useForm, Controller } from "react-hook-form";
 import { isTonAddress, parseFormInputError } from "utils";
 import { useChangeValidatorTx } from "hooks";
@@ -41,7 +41,7 @@ function ChangeValidatorPage() {
   const { mutate, isLoading } = useChangeValidatorTx();
 
   return (
-    <Page title="Transfer">
+    <Page title="Change Validator">
       <Container>
         <form onSubmit={handleSubmit((data) => mutate(data as FormValues))}>
           <ColumnFlex $gap={30}>
@@ -68,9 +68,13 @@ function ChangeValidatorPage() {
                 />
               );
             })}
-            <Button isLoading={isLoading} connectionRequired type="submit">
+            <SubmitButton
+              isLoading={isLoading}
+              connectionRequired
+              type="submit"
+            >
               Proceed
-            </Button>
+            </SubmitButton>
           </ColumnFlex>
         </form>
       </Container>

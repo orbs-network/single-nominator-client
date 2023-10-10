@@ -76,7 +76,7 @@ const StyledButton = styled("button")<{ $isLoading?: boolean }>`
   padding: 0px 16px;
   transition: all 0.3s ease 0s;
   color: rgb(255, 255, 255);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   * {
     font-weight: inherit;

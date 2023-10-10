@@ -1,6 +1,6 @@
-import { Button, Input, Page } from "components";
+import { Input, Page } from "components";
 import React from "react";
-import { ColumnFlex, Container } from "styles";
+import {  Container, InputsContainer, SubmitButton } from "styles";
 import { useForm, Controller } from "react-hook-form";
 import { isTonAddress, parseFormInputError } from "utils";
 import { useTransferFundsTx } from "hooks";
@@ -14,14 +14,14 @@ const inputs = [
     required: true,
   },
   {
-    label: "Comment",
-    name: "comment",
-  },
-  {
     label: "Amount",
     name: "amount",
     type: "number",
     required: true,
+  },
+  {
+    label: "Comment",
+    name: "comment",
   },
 ];
 
@@ -50,7 +50,7 @@ type FormValues = {
     <Page title="Transfer">
       <Container>
         <form onSubmit={handleSubmit((data) => mutate(data as FormValues))}>
-          <ColumnFlex $gap={30}>
+          <InputsContainer>
             {inputs.map((input) => {
               return (
                 <Controller
@@ -76,10 +76,10 @@ type FormValues = {
                 />
               );
             })}
-            <Button connectionRequired isLoading={isLoading} type="submit">
+            <SubmitButton connectionRequired isLoading={isLoading} type="submit">
               Proceed
-            </Button>
-          </ColumnFlex>
+            </SubmitButton>
+          </InputsContainer>
         </form>
       </Container>
     </Page>
