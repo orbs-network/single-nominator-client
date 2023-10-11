@@ -27,14 +27,7 @@ function App() {
 export default App;
 
 
-// const RouteLoader = () => {
-//   return <StyledSkeleton />;
-// }
 
-// const StyledSkeleton = styled(Skeleton)`
-//   width: 100%;
-//   height: 300px;
-// `
 
 const StyledApp = styled(Layout)`
   padding-top: 100px;
