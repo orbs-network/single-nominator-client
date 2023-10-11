@@ -32,7 +32,7 @@ const PageLoader = () => {
   useEffect(() => {
     setTimeout(() => {
       setShow(true);
-    }, 500);
+    }, 300);
   }, []);
 
   if (!show) return null;
