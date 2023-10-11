@@ -1,7 +1,7 @@
-export const Routes =  {
+export const Routes = {
   root: "/",
-  transfer: "/transfer",
-  withdraw:"/withdraw",
+  deposit: "/deposit",
+  withdraw: "/withdraw",
   changeValidator: "/change-validator",
   deploySingleNominator: "/deploy-single-nominator",
-}
+};

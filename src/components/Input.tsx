@@ -11,6 +11,7 @@ interface Props {
   onFocus?: () => void;
   type?: string;
   suffix?: string;
+  info?: string;
 }
 
 export function Input({
@@ -21,6 +22,7 @@ export function Input({
   type = "text",
   field,
   suffix,
+  info
 }: Props) {
   return (
     <StyledContainer $error={!!error}>
@@ -41,10 +43,18 @@ export function Input({
         />
       )}
 
+      {info && <Info>{info}</Info>}
       {error && <Error>{error}</Error>}
     </StyledContainer>
   );
 }
+
+const Info = styled(Typography)`
+  margin-top:10px;
+  font-size: 14px;
+  margin-bottom: 5px;
+  padding-left: 5px;
+`
 
 const Label = styled(Typography)`
   margin-bottom: 10px;

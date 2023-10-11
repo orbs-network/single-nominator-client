@@ -12,6 +12,7 @@ const inputs = [
     validate: isTonAddress,
     error: "Invalid address",
     required: true,
+    info: 'some test text'
   },
   {
     label: "Amount",
@@ -47,7 +48,7 @@ type FormValues = {
   
 
   return (
-    <Page title="Transfer">
+    <Page title="Deposit">
       <Container>
         <form onSubmit={handleSubmit((data) => mutate(data as FormValues))}>
           <InputsContainer>
@@ -70,6 +71,7 @@ type FormValues = {
                         label={input.label}
                         field={field}
                         error={errorMsg}
+                        info={input.info}
                       />
                     );
                   }}

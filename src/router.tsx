@@ -66,7 +66,7 @@ export const router = createBrowserRouter([
         index: true,
       },
       {
-        path: Routes.transfer,
+        path: Routes.deposit,
         element: (
           <PageSuspense>
             <TransferPage />
