@@ -12,6 +12,7 @@
   "dependencies": {
     "@orbs-network/ton-access": "^2.3.3",
     "@tanstack/react-query": "^4.35.7",
+    "@ton-community/func-js": "^0.6.2",
     "@tonconnect/ui-react": "^2.0.0-beta.2",
     "add": "^2.0.6",
     "react": "^18.2.0",
@@ -25,6 +26,7 @@
     "react-tooltip": "^5.21.5",
     "styled-components": "^6.0.8",
     "ton": "^13.6.1",
+    "ton-compiler": "^2.3.0",
     "ton-core": "^0.52.0",
     "yarn": "^1.22.19",
     "zustand": "^4.4.2"
