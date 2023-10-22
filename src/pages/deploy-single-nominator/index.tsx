@@ -1,10 +1,21 @@
 import { Address, Input, Page, Stepper } from "components";
-import { Container, InputsContainer, SubmitButton } from "styles";
+import { ColumnFlex, Container, InputsContainer, SubmitButton, Typography } from "styles";
 import { parseFormInputError } from "utils";
 import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
-import { useTransferFundsTx, useWithdrawTx } from "hooks";
+import {
+  useDeploySingleNominatorTx,
+  useTransferFundsTx,
+  useWithdrawTx,
+} from "hooks";
 import { FormValues, inputs, Steps, useStore } from "./store";
+import { lazy, Suspense } from "react";
+
+const AiFillCheckCircle = lazy(() =>
+  import("react-icons/ai").then((mod) => ({ default: mod.AiFillCheckCircle }))
+);
+
+
 
 const FirstStep = () => {
   const { step, setFromValues } = useStore();
@@ -42,11 +53,9 @@ const FirstStep = () => {
               />
             );
           })}
-          {step === Steps.First && (
-            <SubmitButton connectionRequired type="submit">
-              Proceed
-            </SubmitButton>
-          )}
+          <SubmitButton connectionRequired type="submit">
+            Proceed
+          </SubmitButton>
         </InputsContainer>
       </form>
     </Step>
@@ -54,9 +63,8 @@ const FirstStep = () => {
 };
 
 const SecondStep = () => {
-  const { step, ownerAddress, snAddress, nextStep } = useStore();
+  const { step, snAddress, nextStep } = useStore();
   const { mutateAsync, isLoading } = useTransferFundsTx();
-  if (step < Steps.Second) return null;
 
   const onSubmit = () => {
     mutateAsync({
@@ -68,39 +76,91 @@ const SecondStep = () => {
   return (
     <StyledStep2 $disabled={step !== Steps.Second}>
       <StepTitle>Send 1 Ton</StepTitle>
-      <AddressDisplay label="From owner:" address={ownerAddress} />
-      <AddressDisplay label="To single nominator:" address={snAddress} />
-      {step === Steps.Second && (
-        <SubmitButton isLoading={isLoading} onClick={onSubmit}>
-          Proceed
-        </SubmitButton>
-      )}
+      <Addresses />
+      <SubmitButton isLoading={isLoading} onClick={onSubmit}>
+        Send
+      </SubmitButton>
     </StyledStep2>
   );
 };
 
 const ThirdStep = () => {
-  const { step, ownerAddress } = useStore();
+  const { ownerAddress, nextStep } = useStore();
   const { mutateAsync, isLoading } = useWithdrawTx();
-  if (step < Steps.Third) return null;
 
   const onSubmit = () => {
     mutateAsync({
       amount: 1,
       address: ownerAddress,
-    });
+    }).then(nextStep);
   };
   return (
     <Step>
       <StepTitle>Withrdaw 1 TON to owner</StepTitle>
-      <AddressDisplay label="Owner:" address={ownerAddress} />
+      <Addresses />
       <SubmitButton onClick={onSubmit} isLoading={isLoading}>
-        Proceed
+        Withrdaw
       </SubmitButton>
     </Step>
   );
 };
 
+const FourthStep = () => {
+  const { ownerAddress, validatorAddress, nextStep } = useStore();
+  const { mutateAsync, isLoading } = useDeploySingleNominatorTx();
+
+  const onSubmit = () => {
+    mutateAsync({
+      owner: ownerAddress,
+      validator: validatorAddress,
+    }).then(nextStep);
+  };
+  return (
+    <Step>
+      <StepTitle>Deploy</StepTitle>
+      <Addresses />
+      <SubmitButton onClick={onSubmit} isLoading={isLoading}>
+        Deploy
+      </SubmitButton>
+    </Step>
+  );
+};
+
+
+
+const Addresses = () => {
+  const { ownerAddress, validatorAddress, snAddress } = useStore();
+  return (
+    <ColumnFlex>
+      <AddressDisplay label="Owner:" address={ownerAddress} />
+      <AddressDisplay label="Single nominator:" address={snAddress} />
+      <AddressDisplay label="Validator:" address={validatorAddress} />
+    </ColumnFlex>
+  );
+}
+
+const SuccessStep = () => {
+  const {reset} = useStore();
+   return (
+     <StyledSuccessStep>
+       <StepTitle>Success</StepTitle>
+       <Suspense>
+         <SuccessIcon />
+       </Suspense>
+       <Typography>Successfully deployed single nominator</Typography>
+       <SubmitButton onClick={reset}>Deploy one more</SubmitButton>
+     </StyledSuccessStep>
+   );
+}
+
+
+
+
+const SuccessIcon = styled(AiFillCheckCircle)`
+  font-size: 80px;
+  margin-bottom: 20px;
+  color: ${({ theme }) => theme.colors.success};
+`
 
 const AddressDisplay = ({
   label,
@@ -111,7 +171,7 @@ const AddressDisplay = ({
 }) => {
   return (
     <StyledAddressDisplay>
-      <p>{label}</p> <Address address={address} />
+      <Typography>{label}</Typography> <Address address={address} />
     </StyledAddressDisplay>
   );
 };
@@ -129,10 +189,18 @@ const steps = [
     title: "Withdraw funds",
     component: <ThirdStep />,
   },
+  {
+    title: "Deploy",
+    component: <FourthStep />,
+  },
+  {
+    title: "",
+    component: <SuccessStep />,
+  },
 ];
 
- function DeploySingleNominatorPage() {
-    const {step} = useStore()
+function DeploySingleNominatorPage() {
+  const { step } = useStore();
   return (
     <Page title="Deploy single nominator">
       <Stepper currentStep={step} steps={steps} />
@@ -142,13 +210,15 @@ const steps = [
 
 export default DeploySingleNominatorPage;
 
-
 const Step = styled(Container)<{ $disabled?: boolean }>`
   opacity: ${({ $disabled }) => ($disabled ? 0.5 : 1)};
   pointer-events: ${({ $disabled }) => ($disabled ? "none" : "auto")};
 `;
 const StepTitle = styled.h2`
   margin-bottom: 20px;
+  width: 100%;
+  color: ${({ theme }) => theme.text.title};
+
 `;
 
 const StyledStep2 = styled(Step)`
@@ -165,3 +235,7 @@ const StyledAddressDisplay = styled.div`
   gap: 5px;
 `;
 
+
+const StyledSuccessStep = styled(Step)`
+  align-items: center;
+`;

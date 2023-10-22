@@ -78,5 +78,5 @@ export const SubmitButton = styled(Button)`
   min-width: 200px;
   margin-left: auto;
   margin-right: auto;
-  margin-top: 20px;
+  margin-top: 40px;
 `;

@@ -22,9 +22,11 @@ const lightTheme: DefaultTheme = {
     body: "#F8F9FB",
     container: "white",
     border: "rgb(224, 224, 224)",
+    success: "#00C08B",
   },
   text: {
     color: "rgb(114, 138, 150)",
+    title: "black",
   },
 };
 
@@ -35,9 +37,11 @@ const darkTheme: DefaultTheme = {
     body: "#222830",
     container: "#222830",
     border: "rgba(255, 255, 255, 0.2)",
+    success: "#00C08B",
   },
   text: {
     color: "rgba(255, 255, 255, 0.8)",
+    title: "rgba(255, 255, 255, 0.8)",
   },
 };
 

@@ -4,6 +4,7 @@ import { useCopyToClipboard } from "hooks";
 import { goToTONScanContractUrl, makeElipsisAddress } from "utils";
 import styled from "styled-components";
 import { lazy, Suspense } from "react";
+import { Typography } from "styles";
 
 const IoCopyOutline = lazy(() =>
   import("react-icons/io5").then((mod) => ({ default: mod.IoCopyOutline }))
@@ -36,10 +37,10 @@ export function Address({
   return (
     <StyledContainer className={className}>
       <StyledLink href={goToTONScanContractUrl(address || "")} target="_blank">
-        <p>{makeElipsisAddress(address, padding)}</p>
+        <Typography>{makeElipsisAddress(address, padding)}</Typography>
       </StyledLink>
       <StyledButton onClick={onCopy}>
-        <Icon />
+        <Icon  />
       </StyledButton>
     </StyledContainer>
   );
@@ -69,5 +70,6 @@ const StyledButton = styled.button`
   svg {
     width: 18px;
     height: 18px;
+    color: ${({ theme }) => theme.text.color};
   }
 `;

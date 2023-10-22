@@ -2,7 +2,6 @@ import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ColumnFlex,
-  Container,
   HoverContainer,
   MOBILE_MEDIA_QUERY,
   RowFlex,

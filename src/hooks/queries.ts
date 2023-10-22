@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useGetSender } from "./common";
 import { changeValidator } from "helpers/change-validator";
 import { showSuccessToast } from "toasts";
+import { deploy } from "helpers/deploy";
 
 export const useWithdrawTx = () => {
   const getSender = useGetSender();
@@ -41,8 +42,8 @@ export const useTransferFundsTx = () => {
 export const useChangeValidatorTx = () => {
   const getSender = useGetSender();
   return useMutation(
-    (data: { address: string; newAddress: string }) => {
-      return changeValidator(getSender(), data.address, data.newAddress);
+    ({ address, newAddress }: { address: string; newAddress: string }) => {
+      return changeValidator(getSender(), address, newAddress);
     },
     {
       onSuccess: () => {
@@ -54,7 +55,9 @@ export const useChangeValidatorTx = () => {
 
 export const useDeploySingleNominatorTx = () => {
   const getSender = useGetSender();
-  return useMutation(() => {
-    return Promise.resolve();
-  });
+  return useMutation(
+    ({ owner, validator }: { owner: string; validator: string }) => {
+      return deploy(getSender(), owner, validator);
+    }
+  );
 };
