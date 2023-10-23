@@ -31,8 +31,6 @@ export enum Steps {
   First,
   Second,
   Third,
-  Fourth,
-  Fifth,
 }
 
 
@@ -52,10 +50,10 @@ interface Store extends FormValues {
 }
 
 export const useStore = create<Store>((set) => ({
-  step: Steps.Second,
-  snAddress: "EQDehfd8rzzlqsQlVNPf9_svoBcWJ3eRbz-eqgswjNEKRIwo",
-  ownerAddress: "EQDehfd8rzzlqsQlVNPf9_svoBcWJ3eRbz-eqgswjNEKRIwo",
-  validatorAddress: "EQDehfd8rzzlqsQlVNPf9_svoBcWJ3eRbz-eqgswjNEKRIwo",
+  step: Steps.First,
+  snAddress: "",
+  ownerAddress: "",
+  validatorAddress: "",
   nextStep: () => set((state) => ({ step: state.step + 1 })),
   setFromValues: (value: FormValues) => set({ ...value, step: Steps.Second }),
   reset: () => set({ step: Steps.First, snAddress: "", ownerAddress: "", validatorAddress: "" }),

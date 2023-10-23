@@ -1,21 +1,21 @@
 import { Address, Input, Page, Stepper } from "components";
-import { ColumnFlex, Container, InputsContainer, SubmitButton, Typography } from "styles";
+import {
+  ColumnFlex,
+  Container,
+  InputsContainer,
+  SubmitButton,
+  Typography,
+} from "styles";
 import { parseFormInputError } from "utils";
 import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
-import {
-  useDeploySingleNominatorTx,
-  useTransferFundsTx,
-  useWithdrawTx,
-} from "hooks";
+import { useDeploySingleNominatorTx } from "hooks";
 import { FormValues, inputs, Steps, useStore } from "./store";
 import { lazy, Suspense } from "react";
 
 const AiFillCheckCircle = lazy(() =>
   import("react-icons/ai").then((mod) => ({ default: mod.AiFillCheckCircle }))
 );
-
-
 
 const FirstStep = () => {
   const { step, setFromValues } = useStore();
@@ -63,49 +63,6 @@ const FirstStep = () => {
 };
 
 const SecondStep = () => {
-  const { step, snAddress, nextStep } = useStore();
-  const { mutateAsync, isLoading } = useTransferFundsTx();
-
-  const onSubmit = () => {
-    mutateAsync({
-      amount: 1,
-      address: snAddress,
-    }).then(nextStep);
-  };
-
-  return (
-    <StyledStep2 $disabled={step !== Steps.Second}>
-      <StepTitle>Send 1 Ton</StepTitle>
-      <Addresses />
-      <SubmitButton isLoading={isLoading} onClick={onSubmit}>
-        Send
-      </SubmitButton>
-    </StyledStep2>
-  );
-};
-
-const ThirdStep = () => {
-  const { ownerAddress, nextStep } = useStore();
-  const { mutateAsync, isLoading } = useWithdrawTx();
-
-  const onSubmit = () => {
-    mutateAsync({
-      amount: 1,
-      address: ownerAddress,
-    }).then(nextStep);
-  };
-  return (
-    <Step>
-      <StepTitle>Withrdaw 1 TON to owner</StepTitle>
-      <Addresses />
-      <SubmitButton onClick={onSubmit} isLoading={isLoading}>
-        Withrdaw
-      </SubmitButton>
-    </Step>
-  );
-};
-
-const FourthStep = () => {
   const { ownerAddress, validatorAddress, nextStep } = useStore();
   const { mutateAsync, isLoading } = useDeploySingleNominatorTx();
 
@@ -126,8 +83,6 @@ const FourthStep = () => {
   );
 };
 
-
-
 const Addresses = () => {
   const { ownerAddress, validatorAddress, snAddress } = useStore();
   return (
@@ -137,30 +92,27 @@ const Addresses = () => {
       <AddressDisplay label="Validator:" address={validatorAddress} />
     </ColumnFlex>
   );
-}
+};
 
 const SuccessStep = () => {
-  const {reset} = useStore();
-   return (
-     <StyledSuccessStep>
-       <StepTitle>Success</StepTitle>
-       <Suspense>
-         <SuccessIcon />
-       </Suspense>
-       <Typography>Successfully deployed single nominator</Typography>
-       <SubmitButton onClick={reset}>Deploy one more</SubmitButton>
-     </StyledSuccessStep>
-   );
-}
-
-
-
+  const { reset } = useStore();
+  return (
+    <StyledSuccessStep>
+      <StepTitle>Success</StepTitle>
+      <Suspense>
+        <SuccessIcon />
+      </Suspense>
+      <Typography>Successfully deployed single nominator</Typography>
+      <SubmitButton onClick={reset}>Deploy one more</SubmitButton>
+    </StyledSuccessStep>
+  );
+};
 
 const SuccessIcon = styled(AiFillCheckCircle)`
   font-size: 80px;
   margin-bottom: 20px;
   color: ${({ theme }) => theme.colors.success};
-`
+`;
 
 const AddressDisplay = ({
   label,
@@ -182,16 +134,8 @@ const steps = [
     component: <FirstStep />,
   },
   {
-    title: "Transfer funds",
-    component: <SecondStep />,
-  },
-  {
-    title: "Withdraw funds",
-    component: <ThirdStep />,
-  },
-  {
     title: "Deploy",
-    component: <FourthStep />,
+    component: <SecondStep />,
   },
   {
     title: "",
@@ -218,15 +162,6 @@ const StepTitle = styled.h2`
   margin-bottom: 20px;
   width: 100%;
   color: ${({ theme }) => theme.text.title};
-
-`;
-
-const StyledStep2 = styled(Step)`
-  .address-disaply {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
 `;
 
 const StyledAddressDisplay = styled.div`
@@ -234,7 +169,6 @@ const StyledAddressDisplay = styled.div`
   align-items: center;
   gap: 5px;
 `;
-
 
 const StyledSuccessStep = styled(Step)`
   align-items: center;
