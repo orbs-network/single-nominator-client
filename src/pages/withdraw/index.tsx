@@ -4,7 +4,7 @@ import React from "react";
 import { Container, InputsContainer, SubmitButton } from "styles";
 import { useForm, Controller } from "react-hook-form";
 import { isTonAddress, parseFormInputError } from "utils";
-import {  useWithdrawTx } from "hooks";
+import { useWithdrawTx } from "hooks";
 
 const inputs = [
   {
@@ -13,12 +13,16 @@ const inputs = [
     validate: isTonAddress,
     error: "Invalid address",
   },
+  {
+    label: "Amount",
+    name: "amount",
+  },
 ];
 
 type FormValues = {
   address: string;
+  amount: string;
 };
-
 
 function WithdrawPage() {
   const {
@@ -32,7 +36,7 @@ function WithdrawPage() {
 
   const { mutate, isLoading } = useWithdrawTx();
 
-  const onSubmit = (data: FormValues) => mutate({ address: data.address });
+  const onSubmit = (data: FormValues) => mutate({ address: data.address, amount: Number(data.amount) });
 
   return (
     <Page title="Withdraw">
@@ -65,7 +69,11 @@ function WithdrawPage() {
               );
             })}
 
-            <SubmitButton connectionRequired isLoading={isLoading} type="submit">
+            <SubmitButton
+              connectionRequired
+              isLoading={isLoading}
+              type="submit"
+            >
               Proceed
             </SubmitButton>
           </InputsContainer>
@@ -74,6 +82,5 @@ function WithdrawPage() {
     </Page>
   );
 }
-
 
 export default WithdrawPage;

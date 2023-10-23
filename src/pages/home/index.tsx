@@ -92,7 +92,7 @@ function Navigation() {
   return (
     <StyledContainer>
       {sections.map((section) => {
-        return <SectionComponent section={section} />;
+        return <SectionComponent key={section.title} section={section} />;
       })}
     </StyledContainer>
   );

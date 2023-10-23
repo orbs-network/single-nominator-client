@@ -1,4 +1,4 @@
-import { Address, Sender, beginCell } from "ton-core";
+import { Address, Sender, beginCell, toNano } from "ton-core";
 
 const TRANSFER_WITH_COMMENT = 0x0;
 
@@ -13,7 +13,7 @@ export async function transferFunds(
   const payload = beginCell().storeUint(TRANSFER_WITH_COMMENT, 32).endCell();
   await sender.send({
     to: Address.parse(singleNominatorAddr),
-    value: BigInt(amount),
+    value: BigInt(toNano(amount)),
     sendMode: 1 + 2,
     body: payload,
   });

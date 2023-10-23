@@ -13,9 +13,10 @@ interface Props {
   currentStep: number;
   steps: ISteps[];
   header?: React.ReactNode;
+  setStep: (step: number) => void;
 }
 
-export function Stepper({ steps, currentStep, header }: Props) {
+export function Stepper({ steps, currentStep, header, setStep }: Props) {
   const Component = steps[currentStep].component;
 
   return (
@@ -26,10 +27,10 @@ export function Stepper({ steps, currentStep, header }: Props) {
           <Line />
           {steps.map((step, index) => {
             if (!step.title) return null;
-            const finished = currentStep > index
+            const finished = currentStep > index;
             const isCurrent = currentStep === index;
             return (
-              <Step key={index}>
+              <Step key={index} onClick={() => setStep(index)}>
                 <Indicator $done={finished}>
                   {finished && <BsCheckLg style={{ color: "white" }} />}
                   {isCurrent && <Dot />}

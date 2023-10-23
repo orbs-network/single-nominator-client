@@ -1,20 +1,29 @@
-import { Address, Cell, beginCell, contractAddress, Sender, toNano } from "ton-core";
-import {compileFunc} from '@ton-community/func-js';
-import {TonClient} from "ton";
-import {Buffer} from "buffer";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  Address,
+  Cell,
+  beginCell,
+  contractAddress,
+  Sender,
+  toNano,
+} from "ton-core";
+import { compileFunc } from "@ton-community/func-js";
+import { TonClient } from "ton";
+import { Buffer } from "buffer";
 import { getClientV2 } from "helpers/client";
-import { fromCode } from "tvm-disassembler";
 
 const MSG_VALUE = toNano(0.1);
-const SINGLE_NOMINATOR_CODE_HASH = 'xjonZrValtVP2IwnJ87mP+3f08QvX+Vpg+PkNmB+suU=';
-
+const SINGLE_NOMINATOR_CODE_HASH =
+  "xjonZrValtVP2IwnJ87mP+3f08QvX+Vpg+PkNmB+suU=";
 
 async function getDeployCodeAndData(owner: Address, validator: Address) {
-  const stdlibFileResponse = await fetch('src/contracts/stdlib.fc');
-  const singleNominatorFileResponse = await fetch('src/contracts/single-nominator.fc');
+  const stdlibFileResponse = await fetch("src/contracts/stdlib.fc");
+  const singleNominatorFileResponse = await fetch(
+    "src/contracts/single-nominator.fc"
+  );
 
   if (!stdlibFileResponse.ok || !singleNominatorFileResponse.ok) {
-    console.error('Failed to fetch one or more files.');
+    console.error("Failed to fetch one or more files.");
     return;
   }
 
@@ -30,42 +39,58 @@ async function getDeployCodeAndData(owner: Address, validator: Address) {
     },
   });
 
-  if (result.status === 'error') {
+  if (result.status === "error") {
     console.error(result.message);
     return;
   }
 
   const initialCode = Cell.fromBoc(Buffer.from(result.codeBoc, "base64"))[0];
-  const initialData = beginCell().storeAddress(owner).storeAddress(validator).endCell();
+  const initialData = beginCell()
+    .storeAddress(owner)
+    .storeAddress(validator)
+    .endCell();
 
-  return {code: initialCode, data: initialData};
+  return { code: initialCode, data: initialData };
 }
 
-export async function deploy(
-  sender: Sender,
-  owner: string, 
-  validator: string
-) {
+export async function deploy(sender: Sender, owner: string, validator: string) {
+  const client = await getClientV2();
 
-   const client = await getClientV2();
+  const singleNominatorCodeAndData = await getDeployCodeAndData(
+    Address.parse(owner),
+    Address.parse(validator)
+  );
+  const singleNominatorAddress = contractAddress(-1, {
+    code: singleNominatorCodeAndData?.code,
+    data: singleNominatorCodeAndData?.data,
+  });
 
-  const singleNominatorCodeAndData = await getDeployCodeAndData(Address.parse(owner), Address.parse(validator));
-  const singleNominatorAddress = contractAddress(-1, {code: singleNominatorCodeAndData?.code, data: singleNominatorCodeAndData?.data});
-  
   await sender.send({
     to: singleNominatorAddress,
     value: MSG_VALUE,
     sendMode: 1 + 2,
-    init: singleNominatorCodeAndData
+    init: singleNominatorCodeAndData,
   });
 
-  return await waitForContractToBeDeployed(client, singleNominatorAddress);
+  const success = await waitForContractToBeDeployed(
+    client,
+    singleNominatorAddress
+  );
+  return {
+    success,
+    singleNominatorAddress: singleNominatorAddress.toString(),
+  };
 }
 
-export async function waitForContractToBeDeployed(client: TonClient, deployedContract: Address) {
+export async function waitForContractToBeDeployed(
+  client: TonClient,
+  deployedContract: Address
+) {
   const seqnoStepInterval = 2500;
   let retval = false;
-  console.log(`⏳ waiting for contract to be deployed at [${deployedContract.toString()}]`);
+  console.log(
+    `⏳ waiting for contract to be deployed at [${deployedContract.toString()}]`
+  );
   for (let attempt = 0; attempt < 10; attempt++) {
     await sleep(seqnoStepInterval);
     if (await client.isContractDeployed(deployedContract)) {
@@ -85,19 +110,13 @@ export function sleep(time: number) {
   });
 }
 
-export async function getCodeAndDataHash(client: TonClient, contractAddress: Address) {
-
-  let { code, data } = await client.getContractState(contractAddress);
-  let codeCell = Cell.fromBoc(code!)[0];
-  let dataCell = Cell.fromBoc(data!)[0];
-
-  let decompiled;
-  try {
-    //@ts-ignore
-    decompiled = fromCode(codeCell);
-  } catch (e) {
-    return {error: e?.toString()};
-  }
+export async function getCodeAndDataHash(
+  client: TonClient,
+  contractAddress: Address
+) {
+  const { code, data } = await client.getContractState(contractAddress);
+  const codeCell = Cell.fromBoc(code!)[0];
+  const dataCell = Cell.fromBoc(data!)[0];
 
   const codeCellHash = codeCell.hash();
   const dataCellHash = dataCell.hash();
@@ -106,15 +125,20 @@ export async function getCodeAndDataHash(client: TonClient, contractAddress: Add
     codeCellHash: {
       base64: codeCellHash.toString("base64"),
       hex: codeCellHash.toString("hex"),
-    } ,
+    },
     dataCellHash: {
       base64: dataCellHash.toString("base64"),
       hex: dataCellHash.toString("hex"),
-    } 
+    },
   };
-  
 }
 
-export async function isMatchSingleNominatorCodeHash(client: TonClient, singleNominatorAddress: string) {
-  return (await getCodeAndDataHash(client, Address.parse(singleNominatorAddress))).codeCellHash?.base64 == SINGLE_NOMINATOR_CODE_HASH;
+export async function isMatchSingleNominatorCodeHash(
+  singleNominatorAddress: string
+) {
+  const client = await getClientV2();
+  return (
+    (await getCodeAndDataHash(client, Address.parse(singleNominatorAddress)))
+      .codeCellHash?.base64 == SINGLE_NOMINATOR_CODE_HASH
+  );
 }

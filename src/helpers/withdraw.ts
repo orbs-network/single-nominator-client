@@ -3,7 +3,7 @@ import { fromNano } from "ton";
 import { getClientV2 } from "./client";
 
 const WITHDRAW = 0x1000;
-const MSG_VALUE = toNano(1.1);
+const MSG_VALUE = toNano(0.1);
 
 export async function withdraw(
   sender: Sender,

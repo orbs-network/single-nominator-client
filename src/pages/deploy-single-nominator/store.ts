@@ -33,7 +33,8 @@ export enum Steps {
   First,
   Second,
   Third,
-  Fourth
+  Fourth,
+  Fifth
 }
 
 
@@ -48,8 +49,9 @@ export interface FormValues {
 interface Store extends FormValues {
   step: Steps;
   nextStep: () => void;
-  setFromValues: (value: FormValues) => void;
+  setFromValues: (value: Partial<FormValues>) => void;
   reset: () => void;
+  setStep: (step: Steps) => void;
 }
 
 export const useStore = create<Store>((set) => ({
@@ -58,7 +60,7 @@ export const useStore = create<Store>((set) => ({
   ownerAddress: "",
   validatorAddress: "",
   nextStep: () => set((state) => ({ step: state.step + 1 })),
-  setFromValues: (value: FormValues) => set({ ...value, step: Steps.Second }),
+  setFromValues: (value) => set({ ...value, step: Steps.Second }),
   reset: () => set({ step: Steps.First, snAddress: "", ownerAddress: "", validatorAddress: "" }),
-
+  setStep: (step) => set({ step }),
 }));

@@ -29,7 +29,7 @@ const inputs = [
 type FormValues = {
   address: string;
   comment: string;
-  amount: number;
+  amount: string;
 };
 
 

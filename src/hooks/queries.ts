@@ -4,16 +4,24 @@ import { useMutation } from "@tanstack/react-query";
 import { useGetSender } from "./common";
 import { changeValidator } from "helpers/change-validator";
 import { showSuccessToast } from "toasts";
-import { deploy } from "helpers/deploy";
+import { deploy, isMatchSingleNominatorCodeHash } from "helpers/deploy";
 
 export const useWithdrawTx = () => {
   const getSender = useGetSender();
   return useMutation(
-    ({ address, amount }: { address: string; amount?: number }) => {
+    ({
+      address,
+      amount,
+    }: {
+      address: string;
+      amount?: number;
+      onSuccess?: () => void;
+    }) => {
       return withdraw(getSender(), address, amount);
     },
     {
-      onSuccess: () => {
+      onSuccess: (data, args) => {
+        args.onSuccess?.();
         showSuccessToast("Withdraw success");
       },
     }
@@ -23,11 +31,13 @@ export const useWithdrawTx = () => {
 export const useTransferFundsTx = () => {
   const getSender = useGetSender();
   return useMutation(
-    (data: { address: string; amount: number; comment?: string }) => {
+    (data: { address: string; amount: string; comment?: string }) => {
+      console.log(data.amount);
+      
       return transferFunds(
         getSender(),
         data.address,
-        data.amount,
+        Number(data.amount),
         data.comment
       );
     },
@@ -56,12 +66,42 @@ export const useChangeValidatorTx = () => {
 export const useDeploySingleNominatorTx = () => {
   const getSender = useGetSender();
   return useMutation(
-    ({ owner, validator }: { owner: string; validator: string }) => {                  
-      return deploy(getSender(), owner, validator);
-    }, {
+    async ({
+      owner,
+      validator,
+    }: {
+      owner: string;
+      validator: string;
+      onSuccess: (value: string) => void;
+    }) => {
+      const result = await deploy(getSender(), owner, validator);
+      if (!result.success) {
+        throw new Error("Deploy failed");
+      }
+      return result.singleNominatorAddress;
+    },
+    {
       onError: (error) => {
         console.error(error);
+      },
+      onSuccess: (singleNominatorAddress, args) => {
+        args.onSuccess(singleNominatorAddress);
+      },
+    }
+  );
+};
+
+export const useVerifySNAddress = () => {
+  return useMutation(
+    async ({ snAddress }: { snAddress: string; onSuccess:() => void }) => {
+      const result = await isMatchSingleNominatorCodeHash(snAddress);
+      if(!result) {
+        throw new Error("Not match");
       }
+      return result;
+    },
+    {
+      onSuccess: (result, args) => args.onSuccess(),
     }
   );
 };

@@ -9,7 +9,11 @@ import {
 import { parseFormInputError } from "utils";
 import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
-import { useDeploySingleNominatorTx } from "hooks";
+import {
+  useDeploySingleNominatorTx,
+  useVerifySNAddress,
+  useWithdrawTx,
+} from "hooks";
 import { FormValues, inputs, Steps, useStore } from "./store";
 import { lazy, Suspense } from "react";
 
@@ -63,15 +67,22 @@ const FirstStep = () => {
 };
 
 const SecondStep = () => {
-  const { ownerAddress, validatorAddress, nextStep } = useStore();
-  const { mutateAsync, isLoading } = useDeploySingleNominatorTx();
+  const { ownerAddress, validatorAddress, nextStep, setFromValues } =
+    useStore();
+  const { mutate, isLoading } = useDeploySingleNominatorTx();
 
   const onSubmit = () => {
-    
-    mutateAsync({
+    mutate({
       owner: ownerAddress,
       validator: validatorAddress,
-    }).then(nextStep);
+      onSuccess: (snAddress: string) => {
+        console.log({ snAddress });
+        setFromValues({
+          snAddress,
+        });
+        nextStep();
+      },
+    });
   };
 
   return (
@@ -85,13 +96,95 @@ const SecondStep = () => {
   );
 };
 
+const VerifyStep = () => {
+  const { mutate, isLoading } = useVerifySNAddress();
+  const { nextStep, snAddress } = useStore();
+
+  const onSubmit = () => {
+    mutate({
+      snAddress,
+      onSuccess: () => {
+        console.log("verified");
+
+        nextStep();
+      },
+    });
+  };
+
+  return (
+    <Step>
+      <StepTitle>Verify</StepTitle>
+      <Addresses />
+      <SubmitButton onClick={onSubmit} isLoading={isLoading}>
+        Verify
+      </SubmitButton>
+    </Step>
+  );
+};
+
+const WithdrawStep = () => {
+  const { mutate, isLoading } = useWithdrawTx();
+  const { nextStep, snAddress } = useStore();
+
+  const onSubmit = (data: { amount: string }) => {
+    console.log(data.amount);
+
+    mutate({
+      address: snAddress,
+      amount: Number(data.amount),
+      onSuccess: () => {
+        nextStep();
+      },
+    });
+  };
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+  });
+
+  return (
+    <Step>
+      <StepTitle>Withdraw</StepTitle>
+      <Addresses />
+      <form onSubmit={handleSubmit((data) => onSubmit(data as any))}>
+        <InputsContainer>
+          <Controller
+            name="amount"
+            control={control}
+            key="amount"
+            rules={{ required: true }}
+            render={({ field }) => {
+              const errorMsg = parseFormInputError(errors["amount"]?.type);
+              return (
+                <Input label="Amount" field={field as any} error={errorMsg} />
+              );
+            }}
+          />
+          <SubmitButton isLoading={isLoading} type="submit">
+            Withdraw
+          </SubmitButton>
+        </InputsContainer>
+      </form>
+    </Step>
+  );
+};
+
 const Addresses = () => {
-  const { ownerAddress, validatorAddress } = useStore();
+  const { ownerAddress, validatorAddress, snAddress } = useStore();
   return (
     <ColumnFlex>
-      <AddressDisplay label="Owner:" address={ownerAddress} />
-      {/* <AddressDisplay label="Single nominator:" address={snAddress} /> */}
-      <AddressDisplay label="Validator:" address={validatorAddress} />
+      {ownerAddress && <AddressDisplay label="Owner:" address={ownerAddress} />}
+      {validatorAddress && (
+        <AddressDisplay label="Validator:" address={validatorAddress} />
+      )}
+      {snAddress && (
+        <AddressDisplay label="Single nominator:" address={snAddress} />
+      )}
     </ColumnFlex>
   );
 };
@@ -140,16 +233,24 @@ const steps = [
     component: <SecondStep />,
   },
   {
+    title: "Verify",
+    component: <VerifyStep />,
+  },
+  {
+    title: "Withdraw",
+    component: <WithdrawStep />,
+  },
+  {
     title: "",
     component: <SuccessStep />,
   },
 ];
 
 function DeploySingleNominatorPage() {
-  const { step } = useStore();
+  const { step, setStep } = useStore();
   return (
     <Page title="Deploy single nominator">
-      <Stepper currentStep={step} steps={steps} />
+      <Stepper setStep={setStep} currentStep={step} steps={steps} />
     </Page>
   );
 }
