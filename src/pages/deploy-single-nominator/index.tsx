@@ -54,7 +54,7 @@ const FirstStep = () => {
             );
           })}
           <SubmitButton connectionRequired type="submit">
-            Deploy
+            Proceed
           </SubmitButton>
         </InputsContainer>
       </form>
