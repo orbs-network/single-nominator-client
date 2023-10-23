@@ -104,7 +104,7 @@ const SectionComponent = ({ section }: { section: Section }) => {
       <SectionTitle>{section.title}</SectionTitle>
       <SectionRoutes>
         {section.routes.map((route) => {
-          return <RouteComponent route={route} />;
+          return <RouteComponent key={route.path} route={route} />;
         })}
       </SectionRoutes>
     </ColumnFlex>

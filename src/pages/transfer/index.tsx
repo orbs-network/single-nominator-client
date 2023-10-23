@@ -12,17 +12,19 @@ const inputs = [
     validate: isTonAddress,
     error: "Invalid address",
     required: true,
-    info: 'some test text'
+    info: "Where does it come from? Contrary to popular belief, Lorem Ipsum is not simply random text.",
   },
   {
     label: "Amount",
     name: "amount",
     type: "number",
     required: true,
+    info: "Where does it come from? Contrary to popular belief, Lorem Ipsum is not simply",
   },
   {
     label: "Comment",
     name: "comment",
+    info: "Where does it come from? Contrary to popular belief, Lorem Ipsum is not simply text.",
   },
 ];
 
@@ -68,10 +70,10 @@ type FormValues = {
                     return (
                       <Input
                         type={input.type}
+                        info={input.info}
                         label={input.label}
                         field={field}
                         error={errorMsg}
-                        info={input.info}
                       />
                     );
                   }}
@@ -90,3 +92,4 @@ type FormValues = {
 
 
 export default TransferPage;
+
