@@ -28,6 +28,7 @@
     "ton": "^13.6.1",
     "ton-compiler": "^2.3.0",
     "ton-core": "^0.52.0",
+    "tvm-disassembler": "^3.0.0",
     "yarn": "^1.22.19",
     "zustand": "^4.4.2"
   },
