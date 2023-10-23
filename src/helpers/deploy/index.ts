@@ -41,7 +41,9 @@ export async function deploy(
   owner: string, 
   validator: string
 ) {
+
    const client = await getClientV2();
+
   const singleNominatorCodeAndData = await getDeployCodeAndData(Address.parse(owner), Address.parse(validator));
   const singleNominatorAddress = contractAddress(-1, {code: singleNominatorCodeAndData?.code, data: singleNominatorCodeAndData?.data});
 

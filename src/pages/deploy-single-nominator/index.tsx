@@ -54,7 +54,7 @@ const FirstStep = () => {
             );
           })}
           <SubmitButton connectionRequired type="submit">
-            Proceed
+            Deploy
           </SubmitButton>
         </InputsContainer>
       </form>
@@ -67,11 +67,13 @@ const SecondStep = () => {
   const { mutateAsync, isLoading } = useDeploySingleNominatorTx();
 
   const onSubmit = () => {
+    
     mutateAsync({
       owner: ownerAddress,
       validator: validatorAddress,
     }).then(nextStep);
   };
+
   return (
     <Step>
       <StepTitle>Deploy</StepTitle>
@@ -84,11 +86,11 @@ const SecondStep = () => {
 };
 
 const Addresses = () => {
-  const { ownerAddress, validatorAddress, snAddress } = useStore();
+  const { ownerAddress, validatorAddress } = useStore();
   return (
     <ColumnFlex>
       <AddressDisplay label="Owner:" address={ownerAddress} />
-      <AddressDisplay label="Single nominator:" address={snAddress} />
+      {/* <AddressDisplay label="Single nominator:" address={snAddress} /> */}
       <AddressDisplay label="Validator:" address={validatorAddress} />
     </ColumnFlex>
   );

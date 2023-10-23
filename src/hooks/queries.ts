@@ -56,8 +56,12 @@ export const useChangeValidatorTx = () => {
 export const useDeploySingleNominatorTx = () => {
   const getSender = useGetSender();
   return useMutation(
-    ({ owner, validator }: { owner: string; validator: string }) => {
+    ({ owner, validator }: { owner: string; validator: string }) => {                  
       return deploy(getSender(), owner, validator);
+    }, {
+      onError: (error) => {
+        console.error(error);
+      }
     }
   );
 };

@@ -3,13 +3,13 @@ import {create} from "zustand";
 
 
 export const inputs = [
-  {
-    label: "Single nominator address",
-    name: "snAddress",
-    validate: isTonAddress,
-    error: "Invalid address",
-    required: true,
-  },
+  // {
+  //   label: "Single nominator address",
+  //   name: "snAddress",
+  //   validate: isTonAddress,
+  //   error: "Invalid address",
+  //   required: true,
+  // },
   {
     label: "Owner address",
     name: "ownerAddress",
@@ -27,10 +27,13 @@ export const inputs = [
 ];
 
 
+
+
 export enum Steps {
   First,
   Second,
   Third,
+  Fourth
 }
 
 
