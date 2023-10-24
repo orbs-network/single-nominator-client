@@ -1,28 +1,22 @@
-import { Address, Input, Page, Stepper } from "components";
-import {
-  ColumnFlex,
-  Container,
-  InputsContainer,
-  SubmitButton,
-  Typography,
-} from "styles";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Input, Page, Stepper } from "components";
+import { InputsContainer, SubmitButton, Typography } from "styles";
 import { parseFormInputError } from "utils";
 import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
-import {
-  useDeploySingleNominatorTx,
-  useVerifySNAddress,
-  useWithdrawTx,
-} from "hooks";
-import { FormValues, inputs, Steps, useStore } from "./store";
+import { useDeploySingleNominatorTx, useVerifySNAddress } from "hooks";
+import { FormValues, inputs, useStore } from "./store";
 import { lazy, Suspense } from "react";
+import { Step, StepTitle } from "./styles";
+import { WithdrawStep } from "./WithrawStep";
+import { Addresses } from "./Components";
 
 const AiFillCheckCircle = lazy(() =>
   import("react-icons/ai").then((mod) => ({ default: mod.AiFillCheckCircle }))
 );
 
 const FirstStep = () => {
-  const { step, setFromValues } = useStore();
+  const { setFromValues } = useStore();
   const {
     control,
     handleSubmit,
@@ -33,7 +27,7 @@ const FirstStep = () => {
   });
 
   return (
-    <Step $disabled={step !== Steps.First}>
+    <Step>
       <form
         onSubmit={handleSubmit((data) => setFromValues(data as FormValues))}
       >
@@ -122,73 +116,6 @@ const VerifyStep = () => {
   );
 };
 
-const WithdrawStep = () => {
-  const { mutate, isLoading } = useWithdrawTx();
-  const { nextStep, snAddress } = useStore();
-
-  const onSubmit = (data: { amount: string }) => {
-    console.log(data.amount);
-
-    mutate({
-      address: snAddress,
-      amount: Number(data.amount),
-      onSuccess: () => {
-        nextStep();
-      },
-    });
-  };
-
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    mode: "onSubmit",
-    reValidateMode: "onChange",
-  });
-
-  return (
-    <Step>
-      <StepTitle>Withdraw</StepTitle>
-      <Addresses />
-      <form onSubmit={handleSubmit((data) => onSubmit(data as any))}>
-        <InputsContainer>
-          <Controller
-            name="amount"
-            control={control}
-            key="amount"
-            rules={{ required: true }}
-            render={({ field }) => {
-              const errorMsg = parseFormInputError(errors["amount"]?.type);
-              return (
-                <Input label="Amount" field={field as any} error={errorMsg} />
-              );
-            }}
-          />
-          <SubmitButton isLoading={isLoading} type="submit">
-            Withdraw
-          </SubmitButton>
-        </InputsContainer>
-      </form>
-    </Step>
-  );
-};
-
-const Addresses = () => {
-  const { ownerAddress, validatorAddress, snAddress } = useStore();
-  return (
-    <ColumnFlex>
-      {ownerAddress && <AddressDisplay label="Owner:" address={ownerAddress} />}
-      {validatorAddress && (
-        <AddressDisplay label="Validator:" address={validatorAddress} />
-      )}
-      {snAddress && (
-        <AddressDisplay label="Single nominator:" address={snAddress} />
-      )}
-    </ColumnFlex>
-  );
-};
-
 const SuccessStep = () => {
   const { reset } = useStore();
   return (
@@ -208,20 +135,6 @@ const SuccessIcon = styled(AiFillCheckCircle)`
   margin-bottom: 20px;
   color: ${({ theme }) => theme.colors.success};
 `;
-
-const AddressDisplay = ({
-  label,
-  address,
-}: {
-  label: string;
-  address: string;
-}) => {
-  return (
-    <StyledAddressDisplay>
-      <Typography>{label}</Typography> <Address address={address} />
-    </StyledAddressDisplay>
-  );
-};
 
 const steps = [
   {
@@ -256,22 +169,6 @@ function DeploySingleNominatorPage() {
 }
 
 export default DeploySingleNominatorPage;
-
-const Step = styled(Container)<{ $disabled?: boolean }>`
-  opacity: ${({ $disabled }) => ($disabled ? 0.5 : 1)};
-  pointer-events: ${({ $disabled }) => ($disabled ? "none" : "auto")};
-`;
-const StepTitle = styled.h2`
-  margin-bottom: 20px;
-  width: 100%;
-  color: ${({ theme }) => theme.text.title};
-`;
-
-const StyledAddressDisplay = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 5px;
-`;
 
 const StyledSuccessStep = styled(Step)`
   align-items: center;

@@ -7,15 +7,9 @@ interface ToastConfig {
   position: ToastPosition;
 }
 
-const ToastContent = ({
-  message,
-}: {
-  message: string;
-}) => {
+const ToastContent = ({ message }: { message: string }) => {
   return <Container>{message}</Container>;
 };
-
-
 
 export const showToast = (message: string, config?: ToastConfig) => {
   return toast(() => <ToastContent message={message} />, {
@@ -24,14 +18,19 @@ export const showToast = (message: string, config?: ToastConfig) => {
   });
 };
 
-
 export const showSuccessToast = (message: string) => {
+  toast.dismiss();
   toast.success(() => <ToastContent message={message} />, {
-    duration: 40000,
+    duration: 7000,
   });
 };
 
-
+export const showErrorToast = (message: string) => {
+  toast.dismiss();
+  toast.error(() => <ToastContent message={message} />, {
+    duration: 7000,
+  });
+};
 
 export const clearAllToasts = () => toast.dismiss();
 
