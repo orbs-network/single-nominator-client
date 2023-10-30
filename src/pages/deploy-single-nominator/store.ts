@@ -30,11 +30,11 @@ export const inputs = [
 
 
 export enum Steps {
-  First,
-  Second,
-  Third,
-  Fourth,
-  Fifth
+  ENTER_DATA =  0,
+  DEPLOY = 1,
+  VERIFY = 2,
+  WITHDRAW = 3,
+  SUCCESS = 4,
 }
 
 
@@ -55,12 +55,12 @@ interface Store extends FormValues {
 }
 
 export const useStore = create<Store>((set) => ({
-  step: Steps.First,
+  step: Steps.ENTER_DATA,
   snAddress: "",
   ownerAddress: "",
   validatorAddress: "",
   nextStep: () => set((state) => ({ step: state.step + 1 })),
-  setFromValues: (value) => set({ ...value, step: Steps.Second }),
-  reset: () => set({ step: Steps.First, snAddress: "", ownerAddress: "", validatorAddress: "" }),
+  setFromValues: (value) => set({ ...value, step: Steps.DEPLOY }),
+  reset: () => set({ step: Steps.ENTER_DATA, snAddress: "", ownerAddress: "", validatorAddress: "" }),
   setStep: (step) => set({ step }),
 }));

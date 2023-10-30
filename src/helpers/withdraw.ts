@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Address, Sender, toNano, beginCell } from "ton-core";
 import { TonClient, fromNano } from "ton";
 import { getClientV2 } from "./client";
@@ -12,6 +13,8 @@ export async function withdraw(
   amount?: number
 ) {
   const client = await getClientV2();
+  console.log(singleNominatorAddr, amount, client);
+  
   let _amount;
   if (!amount) {
     _amount = parseFloat(
@@ -65,7 +68,7 @@ export async function waitForConditionChange<T>(func: (...args: any[]) => Promis
 
 export async function getSeqno(client: TonClient, address: string): Promise<bigint | null> {
 
-  let seqno = await client.runMethod(Address.parse(address), 'seqno');
+  const seqno = await client.runMethod(Address.parse(address), 'seqno');
   const stack = seqno.stack.pop();
   if (typeof stack === 'object' && stack.type == 'int') {
       return stack.value;

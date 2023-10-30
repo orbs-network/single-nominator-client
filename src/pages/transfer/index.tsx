@@ -1,6 +1,6 @@
 import { Input, Page } from "components";
 import React from "react";
-import {  Container, InputsContainer, SubmitButton } from "styles";
+import { Container, InputsContainer, SubmitButton } from "styles";
 import { useForm, Controller } from "react-hook-form";
 import { isTonAddress, parseFormInputError } from "utils";
 import { useTransferFundsTx } from "hooks";
@@ -21,11 +21,6 @@ const inputs = [
     required: true,
     info: "Where does it come from? Contrary to popular belief, Lorem Ipsum is not simply",
   },
-  {
-    label: "Comment",
-    name: "comment",
-    info: "Where does it come from? Contrary to popular belief, Lorem Ipsum is not simply text.",
-  },
 ];
 
 type FormValues = {
@@ -34,12 +29,12 @@ type FormValues = {
   amount: string;
 };
 
-
- function TransferPage() {
+function TransferPage() {
   const {
     control,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm({
     mode: "onSubmit",
     reValidateMode: "onChange",
@@ -47,12 +42,18 @@ type FormValues = {
 
   const { mutate, isLoading } = useTransferFundsTx();
 
-  
+  const onSubmit = (data: FormValues) => {
+    mutate({
+      address: data.address,
+      amount: data.amount,
+      onSuccess: reset,
+    });
+  };
 
   return (
     <Page title="Deposit">
       <Container>
-        <form onSubmit={handleSubmit((data) => mutate(data as FormValues))}>
+        <form onSubmit={handleSubmit((data) => onSubmit(data as FormValues))}>
           <InputsContainer>
             {inputs.map((input) => {
               return (
@@ -80,7 +81,11 @@ type FormValues = {
                 />
               );
             })}
-            <SubmitButton connectionRequired isLoading={isLoading} type="submit">
+            <SubmitButton
+              connectionRequired
+              isLoading={isLoading}
+              type="submit"
+            >
               Proceed
             </SubmitButton>
           </InputsContainer>
@@ -90,6 +95,4 @@ type FormValues = {
   );
 }
 
-
 export default TransferPage;
-

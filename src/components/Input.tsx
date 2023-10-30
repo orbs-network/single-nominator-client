@@ -1,7 +1,12 @@
 import styled from "styled-components";
 import { ControllerRenderProps, FieldValues } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
-import { Typography } from "styles";
+import { RowFlex, Typography } from "styles";
+
+type RadioOption = {
+  title: string;
+  value: string;
+};
 
 interface Props {
   placeholder?: string;
@@ -12,18 +17,20 @@ interface Props {
   type?: string;
   suffix?: string;
   info?: string;
+  radioOptions?: RadioOption[];
 }
 
-export function Input({
-  placeholder,
-  error,
-  label,
-  onFocus,
-  type = "text",
-  field,
-  suffix,
-  info
-}: Props) {
+export function Input(props: Props) {
+  const {
+    placeholder,
+    error,
+    label,
+    onFocus,
+    type = "text",
+    field,
+    suffix,
+    info,
+  } = props;
   return (
     <StyledContainer $error={!!error}>
       {label && <Label>{label}</Label>}
@@ -34,6 +41,8 @@ export function Input({
           thousandSeparator={true}
           suffix={suffix}
         />
+      ) : type === "radio" ? (
+        <RadioInput {...props} />
       ) : (
         <input
           onFocus={onFocus}
@@ -50,11 +59,11 @@ export function Input({
 }
 
 const Info = styled(Typography)`
-  margin-top:10px;
+  margin-top: 10px;
   font-size: 14px;
   margin-bottom: 5px;
   padding-left: 5px;
-`
+`;
 
 const Label = styled(Typography)`
   margin-bottom: 10px;
@@ -90,3 +99,37 @@ const StyledContainer = styled.div<{ $error: boolean }>`
     font-size: 16px;
   }
 `;
+
+function RadioInput({ radioOptions, field }: Props) {
+  return (
+    <RadioInputContainer>
+      {radioOptions?.map((option) => {
+        return (
+          <RadioInputOptionContainer key={option.title}>
+            <StyledRadio
+              {...field}
+              type="radio"
+              value={field.value || ""}
+              onChange={() => field.onChange(option.value)}
+            />
+            <Typography>{option.title}</Typography>
+          </RadioInputOptionContainer>
+        );
+      })}
+    </RadioInputContainer>
+  );
+}
+
+const StyledRadio = styled.input`
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+`;
+const RadioInputOptionContainer = styled(RowFlex)`
+  gap: 10px;
+  .title {
+    font-size: 14px;
+  }
+`;
+
+const RadioInputContainer = styled(RowFlex)``;

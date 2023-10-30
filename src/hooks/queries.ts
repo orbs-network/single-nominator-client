@@ -3,7 +3,7 @@ import { withdraw } from "helpers/withdraw";
 import { useMutation } from "@tanstack/react-query";
 import { useGetSender } from "./common";
 import { changeValidator } from "helpers/change-validator";
-import { showSuccessToast } from "toasts";
+import { showErrorToast, showSuccessToast } from "toasts";
 import { deploy, isMatchSingleNominatorCodeHash } from "helpers/deploy";
 
 export const useWithdrawTx = () => {
@@ -24,6 +24,11 @@ export const useWithdrawTx = () => {
         args.onSuccess?.();
         showSuccessToast("Withdraw success");
       },
+      onError: (error) => {
+        if (error instanceof Error) {
+          showErrorToast(error.message);
+        }
+      },
     }
   );
 };
@@ -31,19 +36,22 @@ export const useWithdrawTx = () => {
 export const useTransferFundsTx = () => {
   const getSender = useGetSender();
   return useMutation(
-    (data: { address: string; amount: string; comment?: string }) => {
-      console.log(data.amount);
-      
+    (data: { address: string; amount: string, onSuccess?: () => void}) => {
       return transferFunds(
         getSender(),
         data.address,
         Number(data.amount),
-        data.comment
       );
     },
     {
-      onSuccess: () => {
+      onSuccess: (data, args) => {
+        args.onSuccess?.();
         showSuccessToast("Transfer success");
+      },
+      onError: (error) => {
+        if (error instanceof Error) {
+          showErrorToast(error.message);
+        }
       },
     }
   );
@@ -52,12 +60,25 @@ export const useTransferFundsTx = () => {
 export const useChangeValidatorTx = () => {
   const getSender = useGetSender();
   return useMutation(
-    ({ address, newAddress }: { address: string; newAddress: string }) => {
+    ({
+      address,
+      newAddress,
+    }: {
+      address: string;
+      newAddress: string;
+      onSuccess?: () => void;
+    }) => {
       return changeValidator(getSender(), address, newAddress);
     },
     {
-      onSuccess: () => {
-        showSuccessToast("Change validator success");
+      onSuccess: (data, args) => {
+        args.onSuccess?.();
+        showSuccessToast("Validator changed");
+      },
+      onError: (error) => {
+        if (error instanceof Error) {
+          showErrorToast(error.message);
+        }
       },
     }
   );
@@ -82,10 +103,13 @@ export const useDeploySingleNominatorTx = () => {
     },
     {
       onError: (error) => {
-        console.error(error);
+        if (error instanceof Error) {
+          showErrorToast(error.message);
+        }
       },
       onSuccess: (singleNominatorAddress, args) => {
         args.onSuccess(singleNominatorAddress);
+        showSuccessToast("Deployed successfully");
       },
     }
   );
@@ -93,15 +117,23 @@ export const useDeploySingleNominatorTx = () => {
 
 export const useVerifySNAddress = () => {
   return useMutation(
-    async ({ snAddress }: { snAddress: string; onSuccess:() => void }) => {
+    async ({ snAddress }: { snAddress: string; onSuccess: () => void }) => {
       const result = await isMatchSingleNominatorCodeHash(snAddress);
-      if(!result) {
+      if (!result) {
         throw new Error("Not match");
       }
       return result;
     },
     {
-      onSuccess: (result, args) => args.onSuccess(),
+      onSuccess: (result, args) => {
+        args.onSuccess();
+        showSuccessToast("Verified successfully");
+      },
+      onError: (error) => {
+        if (error instanceof Error) {
+          showErrorToast(error.message);
+        }
+      },
     }
   );
 };
