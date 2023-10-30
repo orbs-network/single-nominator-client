@@ -7,19 +7,19 @@ import { useTransferFundsTx } from "hooks";
 
 const inputs = [
   {
-    label: "Recipient address",
+    label: "Single nominator address (recipient)",
     name: "address",
     validate: isTonAddress,
     error: "Invalid address",
     required: true,
-    info: "Where does it come from? Contrary to popular belief, Lorem Ipsum is not simply random text.",
+    info: "The address of the single-nominator contract that you want to fund. Your wallet is going to send the TON coins to this recipient address.",
   },
   {
-    label: "Amount",
+    label: "Amount to deposit",
     name: "amount",
     type: "number",
     required: true,
-    info: "Where does it come from? Contrary to popular belief, Lorem Ipsum is not simply",
+    info: "A decimal point number of the amount of TON coins that you would like to send from your wallet in order to fund the single-nominator contract.",
   },
 ];
 

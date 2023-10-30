@@ -14,11 +14,13 @@ const useInputs = (isCustomAmount: boolean) => {
         name: "address",
         validate: isTonAddress,
         error: "Invalid address",
+        info: "The address of the single-nominator contract that you want to withdraw from. Your wallet address must be the Owner / admin for this single-nominator.",
       },
       {
-        label: "Select amount",
+        label: "Amount to withdraw",
         name: "customAmount",
         type: "radio",
+        info:"A decimal point number of the amount of TON coins that you would like to withdraw from single-nominator. This amount must be in single-nominator balance (unstaked).",
         radioOptions: [
           {
             title: "Max",
@@ -98,6 +100,7 @@ function WithdrawPage() {
                         label={input.label}
                         field={field as any}
                         error={errorMsg}
+                        info={input.info}
                         radioOptions={input.radioOptions}
                       />
                     );

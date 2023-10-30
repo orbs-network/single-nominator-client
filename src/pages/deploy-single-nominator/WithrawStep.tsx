@@ -1,117 +1,73 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Input } from "components";
-import { useWithdrawTx } from "hooks";
-import { useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { InputsContainer, SubmitButton } from "styles";
-import { parseFormInputError } from "utils";
+import { Button } from "components";
+import { useTransferFundsTx, useWithdrawTx } from "hooks";
+import {  RowFlex, Typography } from "styles";
 import { Addresses } from "./Components";
 import { useStore } from "./store";
-import { Step, StepTitle } from "./styles";
+import { Step, StepSubtitle, StepTitle } from "./styles";
 import styled from "styled-components";
-const useInputs = (isCustomAmount: boolean) => {
-  return useMemo(() => {
-    const inputs = [
-      {
-        label: "Select amount",
-        name: "customAmount",
-        type: "radio",
-        radioOptions: [
-          {
-            title: "Max",
-            value: "max",
-          },
-          {
-            title: "Custom",
-            value: "custom",
-          },
-        ],
-      },
-    ];
-
-    if (isCustomAmount) {
-      inputs.push({
-        label: "Amount",
-        name: "amount",
-      } as any);
-    }
-
-    return inputs;
-  }, [isCustomAmount]);
-};
 
 export const WithdrawStep = () => {
-  const { mutate, isLoading } = useWithdrawTx();
+  const { mutate: withdraw, isLoading: withdrawLoading } = useWithdrawTx();
+  const { mutate: deposit, isLoading: depositLoading } = useTransferFundsTx();
   const { nextStep, snAddress } = useStore();
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm({
-    mode: "onSubmit",
-    reValidateMode: "onChange",
-  });
-
-  const isCustomAmount = watch("customAmount") === "custom";
-
-  const onSubmit = (data: { amount: string }) => {
-    mutate({
+  const onWithdraw = () =>
+    withdraw({
       address: snAddress,
-      amount: isCustomAmount ? Number(data.amount) : undefined,
+      amount: 5,
       onSuccess: () => {
         nextStep();
       },
     });
-  };
 
-  const inputs = useInputs(isCustomAmount);
+  const depositFunds = () =>
+    deposit({
+      address: snAddress,
+      amount: "5",
+      onSuccess: () => {
+        nextStep();
+      },
+    });
 
   return (
     <Step>
-      <StepTitle>Withdraw</StepTitle>
+      <StepTitle>Sanity test withdrawal</StepTitle>
+      <StepSubtitle>
+        To make sure the Owner / admin was set correctly and can withdraw funds
+        from single-nominator, we recommend doing a withdrawal test with a small
+        amount of 5 TON.
+      </StepSubtitle>
       <Addresses />
-      <StyledForm
-        onSubmit={handleSubmit((data) => onSubmit(data as { amount: string }))}
-      >
-        <InputsContainer>
-          {inputs.map((input) => {
-            return (
-              <Controller
-                name={input.name}
-                control={control}
-                key={input.name}
-                rules={{ required: true }}
-                render={({ field }) => {
-                  const errorMsg = parseFormInputError(
-                    errors[input.name]?.type
-                  );
-                  return (
-                    <Input
-                      type={input.type}
-                      radioOptions={input.radioOptions}
-                      label={input.label}
-                      field={field as any}
-                      error={errorMsg}
-                    />
-                  );
-                }}
-              />
-            );
-          })}
 
-          <SubmitButton isLoading={isLoading} type="submit">
-            Withdraw
-          </SubmitButton>
-        </InputsContainer>
-      </StyledForm>
+      <StyledWithdrawActions>
+        <Button isLoading={withdrawLoading} onClick={onWithdraw}>
+          Withdraw 5 TON
+        </Button>
+        <Button isLoading={depositLoading} onClick={depositFunds}>
+          Deposit 5 TON
+        </Button>
+      </StyledWithdrawActions>
+      <BottomText>
+        Make sure you have at least 5 TON coins in your wallet. Deposit it and
+        verify in an explorer that the single-nominator balance is 5 TON higher.
+        Then withdraw and verify that Owner wallet receives the funds back.
+      </BottomText>
     </Step>
   );
 };
 
-
-const StyledForm = styled.form`
-    margin-top: 20px;
+const BottomText = styled(Typography)`
+  margin-top: 30px;
+  font-size: 14px;
+  line-height: 18px;
 `
 
+const StyledWithdrawActions = styled(RowFlex)`
+  margin-top: 30px;
+  justify-content: center;
+  gap: 20px;
+  .button {
+    width: 50%;
+  }
+`;

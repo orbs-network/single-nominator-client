@@ -46,7 +46,7 @@ const useSections = () => {
             title: "Deploy Single Nominator",
             path: Routes.deploySingleNominator,
             description:
-              "Sed maximus mollis est, in imperdiet lectus accumsan ut. Mauris sit amet.",
+              "Used for the initial setup of a new validator node. Deploys the official single-nominator smart contract to TON masterchain.",
             image: darkMode
               ? DeploySingleNominatorDarkImg
               : DeploySingleNominatorImg,
@@ -56,20 +56,20 @@ const useSections = () => {
             title: "Change Validator",
             path: Routes.changeValidator,
             description:
-              "Sed maximus mollis est, in imperdiet lectus accumsan ut. Mauris sit amet.",
+              "If the private key stored on the validator node is compromised or replaced, or if the validator node is changed, update the contract to a new validator address.",
             image: darkMode ? ChangeValidatorDarkImg : ChangeValidatorImg,
             button: "Change",
           },
         ],
       },
       {
-        title: "Operations",
+        title: "Operation",
         routes: [
           {
             title: "Deposit",
             path: Routes.deposit,
             description:
-              "Sed maximus mollis est, in imperdiet lectus accumsan ut. Mauris sit amet.",
+              "Deposit new TON coins from your wallet to fund the single-nominator contract. This TON coin will be used for staking in the elector.",
             image: darkMode ? TransferDarkImg : TransferImg,
             button: "Deposit",
           },
@@ -77,7 +77,7 @@ const useSections = () => {
             title: "Withdraw",
             path: Routes.withdraw,
             description:
-              "Sed maximus mollis est, in imperdiet lectus accumsan ut. Mauris sit amet.",
+              "After TON coin was unstaked by the validator node and returned to the single-nominator contract, withdraw it back to your wallet.",
             image: darkMode ? WithdrawDarkImg : WithdrawImg,
             button: "Withdraw",
           },
@@ -114,13 +114,14 @@ const SectionComponent = ({ section }: { section: Section }) => {
 const SectionRoutes = styled(RowFlex)`
   flex-wrap: wrap;
   gap: 20px;
+  align-items: stretch;
 `;
 
 const RouteComponent = ({ route }: { route: Route }) => {
   const navigate = useNavigate();
   return (
     <StyledNavigation key={route.path}>
-      <ColumnFlex $gap={20}>
+      <ColumnFlex $gap={20} style={{height:'100%'}}>
         <RouteLogo src={route.image} />
         <RouteTitle>{route.title}</RouteTitle>
         <RouteDescription>{route.description}</RouteDescription>
@@ -137,6 +138,7 @@ const StyledButton = styled(Button)`
   width: 100%;
   margin-left: auto;
   margin-right: auto;
+  margin-top: auto;
 `;
 
 const RouteTitle = styled(Typography)`

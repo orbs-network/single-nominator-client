@@ -7,7 +7,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useDeploySingleNominatorTx, useVerifySNAddress } from "hooks";
 import { FormValues, inputs, useStore } from "./store";
 import { lazy, Suspense } from "react";
-import { Step, StepTitle } from "./styles";
+import { Step, StepSubtitle, StepTitle } from "./styles";
 import { WithdrawStep } from "./WithrawStep";
 import { Addresses } from "./Components";
 
@@ -45,7 +45,7 @@ const FirstStep = () => {
                     input.error
                   );
                   return (
-                    <Input label={input.label} field={field} error={errorMsg} />
+                    <Input info={input.info} label={input.label} field={field} error={errorMsg} />
                   );
                 }}
               />
@@ -82,6 +82,11 @@ const SecondStep = () => {
   return (
     <Step>
       <StepTitle>Deploy</StepTitle>
+      <StepSubtitle>
+        Your wallet needs to have at least 2 TON coins for deployment. At least
+        1 TON coin should remain in single-nominator balance at all time for
+        storage fee costs on masterchain.
+      </StepSubtitle>
       <Addresses />
       <SubmitButton onClick={onSubmit} isLoading={isLoading}>
         Deploy
@@ -108,6 +113,11 @@ const VerifyStep = () => {
   return (
     <Step>
       <StepTitle>Verify</StepTitle>
+      <StepSubtitle>
+        After deployment is complete, this step will read the code hash from
+        single-nominator contract that was just deployed and compare it to the
+        code hash of the audited version.
+      </StepSubtitle>
       <Addresses />
       <SubmitButton onClick={onSubmit} isLoading={isLoading}>
         Verify

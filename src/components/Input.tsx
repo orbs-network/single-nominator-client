@@ -63,6 +63,8 @@ const Info = styled(Typography)`
   font-size: 14px;
   margin-bottom: 5px;
   padding-left: 5px;
+  line-height: 19px;
+  opacity: 0.8;
 `;
 
 const Label = styled(Typography)`

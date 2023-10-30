@@ -5,6 +5,7 @@ import { Layout, MOBILE_MEDIA_QUERY, RowFlex } from "styles";
 import { Link } from "react-router-dom";
 import { useThemeContext } from "theme";
 import LogoImg from "assets/images/logo.svg";
+import { GITHUB_URL } from "consts";
 
 const BsGithub = lazy(() =>
   import("react-icons/bs").then((module) => ({ default: module.BsGithub }))
@@ -53,7 +54,10 @@ const Toggle = styled.button`
 const GithubLink = () => {
   return (
     <Suspense>
-      <Github href="/" target="_blank">
+      <Github
+        href={GITHUB_URL}
+        target="_blank"
+      >
         <BsGithub />
         <p>GitHub</p>
       </Github>

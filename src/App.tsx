@@ -31,5 +31,8 @@ export default App;
 
 const StyledApp = styled(Layout)`
   padding-top: 100px;
-  padding-bottom: 70px;
+  padding-bottom: 0px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 `;

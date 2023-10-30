@@ -32,7 +32,7 @@ export function Button({
 
   return (
     <StyledButton
-      className={className}
+      className={`${className} button`}
       type={connectMode ? "button" : type}
       $isLoading={isLoading}
       onClick={handleClick}
