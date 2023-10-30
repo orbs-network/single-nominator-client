@@ -38,7 +38,7 @@ export async function withdraw(
     body: payload,
   });
   
-  return await waitForConditionChange(client.getBalance, [sender.address!.toString()], oldBalance);
+  return await waitForConditionChange(client.getBalance, [sender.address!.toString()], BigInt(oldBalance));
 }
 
 
