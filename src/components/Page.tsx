@@ -23,7 +23,7 @@ const Footer = () => {
     <StyledFooter>
       <Typography>
         To receive support for using single-nominator contact the team on{' '}
-        <a href="https://t.me/tonlabs">Telegram</a>
+        <a target='_blank' href="https://t.me/tonlabs">Telegram</a>
       </Typography>
     </StyledFooter>
   );
