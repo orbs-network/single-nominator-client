@@ -102,3 +102,8 @@ export async function waitForContractToBeDeployed(
   // console.log(`⌛️ waited for contract deployment ${((attempt + 1) * seqnoStepInterval) / 1000}s`);
   return retval;
 }
+
+export const getBalance = async (address: string) => {
+  const client = await getClientV2();
+  return (await client.getBalance(Address.parse(address))).toString();
+};

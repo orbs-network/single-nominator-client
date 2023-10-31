@@ -11,7 +11,7 @@ export const StyledWithdrawActions = styled(RowFlex)`
   justify-content: center;
   gap: 20px;
   .button {
-    width: 50%;
+   min-width: 100px;
   }
 `;
 

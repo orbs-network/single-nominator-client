@@ -5,7 +5,8 @@ import { useGetSender } from "./common";
 import { changeValidator, roles } from "helpers/change-validator";
 import { deploy } from "helpers/deploy";
 import { isTonAddress } from "utils";
-import { isMatchSingleNominatorCodeHash } from "helpers/util";
+import { getBalance, isMatchSingleNominatorCodeHash } from "helpers/util";
+import { fromNano } from "ton-core";
 
 export const useWithdrawTx = () => {
   const getSender = useGetSender();
@@ -158,5 +159,18 @@ export const useRoles = (address?: string) => {
       return roles(address!);
     },
     enabled: !!address && isTonAddress(address),
+  });
+};
+
+export const useSingleNominatorBalance = (address?: string) => {
+  return useQuery({
+    queryFn: async () => {
+      const result = await getBalance(address!) ;
+
+      return fromNano(result);
+    },
+    queryKey: ["useSingleNominatorBalance", address],
+    enabled: !!address && isTonAddress(address),
+    refetchInterval: 5_000
   });
 };

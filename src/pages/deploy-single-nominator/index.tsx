@@ -1,12 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AddressDisplay, Button, Input, Page, Stepper, TxError, TxSuccess } from "components";
+import {
+  AddressDisplay,
+  Button,
+  Input,
+  Page,
+  Stepper,
+  TxError,
+  TxSuccess,
+} from "components";
 import { ColumnFlex, InputsContainer, SubmitButton } from "styles";
 import { parseFormInputError } from "utils";
 import { Controller, useForm } from "react-hook-form";
-import { useDeploySingleNominatorTx, useTransferFundsTx, useVerifySNAddress, useWithdrawTx } from "hooks";
+import {
+  useDeploySingleNominatorTx,
+  useSingleNominatorBalance,
+  useTransferFundsTx,
+  useVerifySNAddress,
+  useWithdrawTx,
+} from "hooks";
 import { FormValues, inputs, useStore } from "./store";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { BottomText, StyledAddresses, StyledWithdrawActions } from "./styles";
+import BN from "bignumber.js";
 
 export const Addresses = () => {
   const { ownerAddress, validatorAddress, snAddress } = useStore();
@@ -22,8 +37,6 @@ export const Addresses = () => {
     </StyledAddresses>
   );
 };
-
-
 
 const FirstStep = () => {
   const { setFromValues } = useStore();
@@ -170,6 +183,7 @@ const SuccessStep = () => {
   );
 };
 
+const WITHDRAW_STEP_AMOUNT = 5;
 export const WithdrawStep = () => {
   const [error, setError] = useState("");
   const { mutate: withdraw, isLoading: withdrawLoading } = useWithdrawTx();
@@ -177,19 +191,18 @@ export const WithdrawStep = () => {
 
   const { nextStep, snAddress, reset } = useStore();
 
+
   const onWithdraw = () =>
     withdraw({
       address: snAddress,
-      amount: 5,
-      onSuccess: nextStep,
+      amount: WITHDRAW_STEP_AMOUNT,
       onError: setError,
     });
 
   const depositFunds = () =>
     deposit({
       address: snAddress,
-      amount: "5",
-      onSuccess: nextStep,
+      amount: WITHDRAW_STEP_AMOUNT.toString(),
       onError: setError,
     });
 
@@ -205,8 +218,6 @@ export const WithdrawStep = () => {
         <TxError btnText="Try again" text={error} onClick={reset} />
       ) : (
         <>
-          <Addresses />
-
           <StyledWithdrawActions>
             <Button isLoading={withdrawLoading} onClick={onWithdraw}>
               Withdraw 5 TON
@@ -221,14 +232,14 @@ export const WithdrawStep = () => {
             higher. Then withdraw and verify that Owner wallet receives the
             funds back.
           </BottomText>
+          <SubmitButton  onClick={nextStep}>
+            Finish
+          </SubmitButton>
         </>
       )}
     </Stepper.Step>
   );
 };
-
-
-
 
 const steps = [
   {
