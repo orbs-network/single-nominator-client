@@ -23,6 +23,7 @@ const lightTheme: DefaultTheme = {
     container: "white",
     border: "rgb(224, 224, 224)",
     success: "#00C08B",
+    error: "#FF3333",
   },
   text: {
     color: "rgb(114, 138, 150)",
@@ -38,6 +39,7 @@ const darkTheme: DefaultTheme = {
     container: "#222830",
     border: "rgba(255, 255, 255, 0.2)",
     success: "#00C08B",
+    error:"#FF3333"
   },
   text: {
     color: "rgba(255, 255, 255, 0.8)",

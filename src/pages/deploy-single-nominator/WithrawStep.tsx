@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button } from "components";
+import { Button, Stepper } from "components";
 import { useTransferFundsTx, useWithdrawTx } from "hooks";
 import {  RowFlex, Typography } from "styles";
 import { Addresses } from "./Components";
 import { useStore } from "./store";
-import { Step, StepSubtitle, StepTitle } from "./styles";
 import styled from "styled-components";
 
 export const WithdrawStep = () => {
@@ -31,13 +30,13 @@ export const WithdrawStep = () => {
     });
 
   return (
-    <Step>
-      <StepTitle>Sanity test withdrawal</StepTitle>
-      <StepSubtitle>
+    <Stepper.Step>
+      <Stepper.StepTitle>Sanity test withdrawal</Stepper.StepTitle>
+      <Stepper.StepSubtitle>
         To make sure the Owner / admin was set correctly and can withdraw funds
         from single-nominator, we recommend doing a withdrawal test with a small
         amount of 5 TON.
-      </StepSubtitle>
+      </Stepper.StepSubtitle>
       <Addresses />
 
       <StyledWithdrawActions>
@@ -53,7 +52,7 @@ export const WithdrawStep = () => {
         verify in an explorer that the single-nominator balance is 5 TON higher.
         Then withdraw and verify that Owner wallet receives the funds back.
       </BottomText>
-    </Step>
+    </Stepper.Step>
   );
 };
 

@@ -8,13 +8,11 @@ import {
   toNano,
 } from "ton-core";
 import { compileFunc } from "@ton-community/func-js";
-import { TonClient } from "ton";
 import { Buffer } from "buffer";
 import { getClientV2 } from "helpers/client";
+import { waitForContractToBeDeployed } from "./util";
 
 const MSG_VALUE = toNano(0.1);
-const SINGLE_NOMINATOR_CODE_HASH =
-  "xjonZrValtVP2IwnJ87mP+3f08QvX+Vpg+PkNmB+suU=";
 
 async function getDeployCodeAndData(owner: Address, validator: Address) {
   const stdlibFileResponse = await fetch("src/contracts/stdlib.fc");
@@ -82,63 +80,4 @@ export async function deploy(sender: Sender, owner: string, validator: string) {
   };
 }
 
-export async function waitForContractToBeDeployed(
-  client: TonClient,
-  deployedContract: Address
-) {
-  const seqnoStepInterval = 2500;
-  let retval = false;
-  console.log(
-    `⏳ waiting for contract to be deployed at [${deployedContract.toString()}]`
-  );
-  for (let attempt = 0; attempt < 10; attempt++) {
-    await sleep(seqnoStepInterval);
-    if (await client.isContractDeployed(deployedContract)) {
-      retval = true;
-      break;
-    }
-  }
-  // console.log(`⌛️ waited for contract deployment ${((attempt + 1) * seqnoStepInterval) / 1000}s`);
-  return retval;
-}
 
-export function sleep(time: number) {
-  return new Promise((resolve) => {
-    console.log(`💤 ${time / 1000}s ...`);
-
-    setTimeout(resolve, time);
-  });
-}
-
-export async function getCodeAndDataHash(
-  client: TonClient,
-  contractAddress: Address
-) {
-  const { code, data } = await client.getContractState(contractAddress);
-  const codeCell = Cell.fromBoc(code!)[0];
-  const dataCell = Cell.fromBoc(data!)[0];
-
-  const codeCellHash = codeCell.hash();
-  const dataCellHash = dataCell.hash();
-
-  return {
-    codeCellHash: {
-      base64: codeCellHash.toString("base64"),
-      hex: codeCellHash.toString("hex"),
-    },
-    dataCellHash: {
-      base64: dataCellHash.toString("base64"),
-      hex: dataCellHash.toString("hex"),
-    },
-  };
-}
-
-export async function isMatchSingleNominatorCodeHash(
-  singleNominatorAddress: string
-) {
-  const client = await getClientV2();
-  return (
-    (await getCodeAndDataHash(client, Address.parse(singleNominatorAddress)))
-      .codeCellHash?.base64 == SINGLE_NOMINATOR_CODE_HASH
-  );
-}

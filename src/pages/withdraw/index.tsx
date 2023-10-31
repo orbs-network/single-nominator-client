@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Input, Page } from "components";
-import React, { useMemo } from "react";
+import { Input, Page, TxError, TxSuccess } from "components";
+import React, { useMemo, useState } from "react";
 import { Container, InputsContainer, SubmitButton } from "styles";
 import { useForm, Controller } from "react-hook-form";
 import { isTonAddress, parseFormInputError } from "utils";
 import { useWithdrawTx } from "hooks";
+import { useNavigate } from "react-router-dom";
 
 const useInputs = (isCustomAmount: boolean) => {
   return useMemo(() => {
@@ -20,7 +21,7 @@ const useInputs = (isCustomAmount: boolean) => {
         label: "Amount to withdraw",
         name: "customAmount",
         type: "radio",
-        info:"A decimal point number of the amount of TON coins that you would like to withdraw from single-nominator. This amount must be in single-nominator balance (unstaked).",
+        info: "A decimal point number of the amount of TON coins that you would like to withdraw from single-nominator. This amount must be in single-nominator balance (unstaked).",
         radioOptions: [
           {
             title: "Max",
@@ -51,11 +52,56 @@ type FormValues = {
 };
 
 function WithdrawPage() {
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+
+  return (
+    <Page title="Withdraw">
+      <Container>
+        {error ? (
+          <Error error={error} />
+        ) : success ? (
+          <Success />
+        ) : (
+          <Form setSuccess={() => setSuccess(true)} setError={setError} />
+        )}{" "}
+      </Container>
+    </Page>
+  );
+}
+
+const Error = ({ error }: { error: string }) => {
+  return (
+    <TxError
+      btnText="Try again"
+      text={error}
+      onClick={() => window.location.reload()}
+    />
+  );
+};
+
+const Success = () => {
+  const navigate = useNavigate();
+  return (
+    <TxSuccess
+      text="Withdrawn successfully"
+      btnText="Home"
+      onClick={() => navigate("/")}
+    />
+  );
+};
+
+const Form = ({
+  setError,
+  setSuccess,
+}: {
+  setError: (value: string) => void;
+  setSuccess: () => void;
+}) => {
   const {
     handleSubmit,
     formState: { errors },
     control,
-    reset,
     watch,
   } = useForm({
     mode: "onSubmit",
@@ -70,57 +116,47 @@ function WithdrawPage() {
   const onSubmit = (data: FormValues) => {
     mutate({
       address: data.address,
-      amount: isCustomAmount ?  Number(data.amount) : undefined,
-      onSuccess: reset,
+      amount: isCustomAmount ? Number(data.amount) : undefined,
+      onSuccess: setSuccess,
+      onError: setError,
     });
   };
 
   return (
-    <Page title="Withdraw">
-      <Container>
-        <form onSubmit={handleSubmit((data) => onSubmit(data as FormValues))}>
-          <InputsContainer>
-            {inputs.map((input) => {
-              return (
-                <Controller
-                  name={input.name}
-                  control={control}
-                  key={input.name}
-                  rules={{ required: true, validate: input.validate }}
-                  render={({ field }) => {
-                    const error = errors[input.name];
-                    const errorMsg = parseFormInputError(
-                      error?.type,
-                      input.error
-                    );
+    <form onSubmit={handleSubmit((data) => onSubmit(data as FormValues))}>
+      <InputsContainer>
+        {inputs.map((input) => {
+          return (
+            <Controller
+              name={input.name}
+              control={control}
+              key={input.name}
+              rules={{ required: true, validate: input.validate }}
+              render={({ field }) => {
+                const error = errors[input.name];
+                const errorMsg = parseFormInputError(error?.type, input.error);
 
-                    return (
-                      <Input
-                        type={input.type}
-                        label={input.label}
-                        field={field as any}
-                        error={errorMsg}
-                        info={input.info}
-                        radioOptions={input.radioOptions}
-                      />
-                    );
-                  }}
-                />
-              );
-            })}
+                return (
+                  <Input
+                    type={input.type}
+                    label={input.label}
+                    field={field as any}
+                    error={errorMsg}
+                    info={input.info}
+                    radioOptions={input.radioOptions}
+                  />
+                );
+              }}
+            />
+          );
+        })}
 
-            <SubmitButton
-              connectionRequired
-              isLoading={isLoading}
-              type="submit"
-            >
-              Proceed
-            </SubmitButton>
-          </InputsContainer>
-        </form>
-      </Container>
-    </Page>
+        <SubmitButton connectionRequired isLoading={isLoading} type="submit">
+          Proceed
+        </SubmitButton>
+      </InputsContainer>
+    </form>
   );
-}
+};
 
 export default WithdrawPage;

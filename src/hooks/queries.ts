@@ -1,10 +1,12 @@
 import { transferFunds } from "helpers/transfer-funds";
 import { withdraw } from "helpers/withdraw";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useGetSender } from "./common";
-import { changeValidator } from "helpers/change-validator";
-import { showErrorToast, showSuccessToast } from "toasts";
-import { deploy, isMatchSingleNominatorCodeHash } from "helpers/deploy";
+import { changeValidator, roles } from "helpers/change-validator";
+import { showErrorToast } from "toasts";
+import { deploy } from "helpers/deploy";
+import { isTonAddress } from "utils";
+import { isMatchSingleNominatorCodeHash } from "helpers/util";
 
 export const useWithdrawTx = () => {
   const getSender = useGetSender();
@@ -16,17 +18,17 @@ export const useWithdrawTx = () => {
       address: string;
       amount?: number;
       onSuccess?: () => void;
-    }) => {
+      onError?: (value: string) => void;
+    }) => {      
       return withdraw(getSender(), address, amount);
     },
     {
       onSuccess: (data, args) => {
         args.onSuccess?.();
-        showSuccessToast("Withdraw success");
       },
-      onError: (error) => {
+      onError: (error, args) => {
         if (error instanceof Error) {
-          showErrorToast(error.message);
+          args.onError?.(error.message);
         }
       },
     }
@@ -36,7 +38,7 @@ export const useWithdrawTx = () => {
 export const useTransferFundsTx = () => {
   const getSender = useGetSender();
   return useMutation(
-    (data: { address: string; amount: string, onSuccess?: () => void}) => {
+    (data: { address: string; amount: string, onSuccess?: () => void, onError?: (value: string) => void}) => {
       return transferFunds(
         getSender(),
         data.address,
@@ -46,11 +48,10 @@ export const useTransferFundsTx = () => {
     {
       onSuccess: (data, args) => {
         args.onSuccess?.();
-        showSuccessToast("Transfer success");
       },
-      onError: (error) => {
+      onError: (error, args) => {
         if (error instanceof Error) {
-          showErrorToast(error.message);
+          args.onError?.(error.message);
         }
       },
     }
@@ -63,17 +64,23 @@ export const useChangeValidatorTx = () => {
     ({
       address,
       newAddress,
+      oldValidatorAddress,
     }: {
       address: string;
       newAddress: string;
+      oldValidatorAddress: string;
       onSuccess?: () => void;
     }) => {
-      return changeValidator(getSender(), address, newAddress);
+      return changeValidator(
+        getSender(),
+        address,
+        newAddress,
+        oldValidatorAddress
+      );
     },
     {
       onSuccess: (data, args) => {
         args.onSuccess?.();
-        showSuccessToast("Validator changed");
       },
       onError: (error) => {
         if (error instanceof Error) {
@@ -109,7 +116,6 @@ export const useDeploySingleNominatorTx = () => {
       },
       onSuccess: (singleNominatorAddress, args) => {
         args.onSuccess(singleNominatorAddress);
-        showSuccessToast("Deployed successfully");
       },
     }
   );
@@ -127,7 +133,6 @@ export const useVerifySNAddress = () => {
     {
       onSuccess: (result, args) => {
         args.onSuccess();
-        showSuccessToast("Verified successfully");
       },
       onError: (error) => {
         if (error instanceof Error) {
@@ -137,3 +142,16 @@ export const useVerifySNAddress = () => {
     }
   );
 };
+
+
+
+export const useRoles = (address?: string) => {
+
+  return useQuery({
+    queryKey: ["useRoles", address],
+    queryFn: async () => {
+      return roles(address!);
+    },
+    enabled: !!address && isTonAddress(address),
+  });
+}

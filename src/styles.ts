@@ -43,10 +43,10 @@ export const HoverContainer = styled(Container)`
   }
 `;
 
-export const ColumnFlex = styled.div<{ $gap?: number }>`
+export const ColumnFlex = styled.div<{ $gap?: number; $noGap?: boolean }>`
   display: flex;
   flex-direction: column;
-  gap: ${({ $gap }) => `${$gap || 10}px`};
+  gap: ${({ $gap, $noGap }) => $noGap ?  '0px' :  `${$gap || 10}px`};
 `;
 
 export const Typography = styled.p`

@@ -1,19 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Input, Page, Stepper } from "components";
-import { InputsContainer, SubmitButton, Typography } from "styles";
+import { Input, Page, Stepper, TxSuccess } from "components";
+import { InputsContainer, SubmitButton } from "styles";
 import { parseFormInputError } from "utils";
-import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
 import { useDeploySingleNominatorTx, useVerifySNAddress } from "hooks";
 import { FormValues, inputs, useStore } from "./store";
-import { lazy, Suspense } from "react";
-import { Step, StepSubtitle, StepTitle } from "./styles";
 import { WithdrawStep } from "./WithrawStep";
 import { Addresses } from "./Components";
 
-const AiFillCheckCircle = lazy(() =>
-  import("react-icons/ai").then((mod) => ({ default: mod.AiFillCheckCircle }))
-);
 
 const FirstStep = () => {
   const { setFromValues } = useStore();
@@ -27,7 +21,7 @@ const FirstStep = () => {
   });
 
   return (
-    <Step>
+    <Stepper.Step>
       <form
         onSubmit={handleSubmit((data) => setFromValues(data as FormValues))}
       >
@@ -56,7 +50,7 @@ const FirstStep = () => {
           </SubmitButton>
         </InputsContainer>
       </form>
-    </Step>
+    </Stepper.Step>
   );
 };
 
@@ -80,18 +74,18 @@ const SecondStep = () => {
   };
 
   return (
-    <Step>
-      <StepTitle>Deploy</StepTitle>
-      <StepSubtitle>
+    <Stepper.Step>
+      <Stepper.StepTitle>Deploy</Stepper.StepTitle>
+      <Stepper.StepSubtitle>
         Your wallet needs to have at least 2 TON coins for deployment. At least
         1 TON coin should remain in single-nominator balance at all time for
         storage fee costs on masterchain.
-      </StepSubtitle>
+      </Stepper.StepSubtitle>
       <Addresses />
       <SubmitButton onClick={onSubmit} isLoading={isLoading}>
         Deploy
       </SubmitButton>
-    </Step>
+    </Stepper.Step>
   );
 };
 
@@ -111,40 +105,35 @@ const VerifyStep = () => {
   };
 
   return (
-    <Step>
-      <StepTitle>Verify</StepTitle>
-      <StepSubtitle>
+    <Stepper.Step>
+      <Stepper.StepTitle>Verify</Stepper.StepTitle>
+      <Stepper.StepSubtitle>
         After deployment is complete, this step will read the code hash from
         single-nominator contract that was just deployed and compare it to the
         code hash of the audited version.
-      </StepSubtitle>
+      </Stepper.StepSubtitle>
       <Addresses />
       <SubmitButton onClick={onSubmit} isLoading={isLoading}>
         Verify
       </SubmitButton>
-    </Step>
+    </Stepper.Step>
   );
 };
 
 const SuccessStep = () => {
   const { reset } = useStore();
   return (
-    <StyledSuccessStep>
-      <StepTitle>Success</StepTitle>
-      <Suspense>
-        <SuccessIcon />
-      </Suspense>
-      <Typography>Successfully deployed single nominator</Typography>
-      <SubmitButton onClick={reset}>Deploy one more</SubmitButton>
-    </StyledSuccessStep>
+    <Stepper.Step>
+      <Stepper.StepTitle>Success</Stepper.StepTitle>
+      <TxSuccess
+        onClick={reset}
+        text="Successfully deployed single nominator"
+        btnText="Deploy again"
+      />
+    </Stepper.Step>
   );
 };
 
-const SuccessIcon = styled(AiFillCheckCircle)`
-  font-size: 80px;
-  margin-bottom: 20px;
-  color: ${({ theme }) => theme.colors.success};
-`;
 
 const steps = [
   {
@@ -179,7 +168,3 @@ function DeploySingleNominatorPage() {
 }
 
 export default DeploySingleNominatorPage;
-
-const StyledSuccessStep = styled(Step)`
-  align-items: center;
-`;

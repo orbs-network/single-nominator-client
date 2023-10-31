@@ -1,5 +1,6 @@
 import { Address, Sender, toNano, beginCell } from "ton-core";
-import { TonClient } from "ton";
+import { getClientV2 } from "./client";
+import { waitForConditionChange } from "./util";
 
 const MSG_VALUE = toNano(1.1);
 const CHANGE_VALIDATOR_ADDRESS = 0x1001;
@@ -7,7 +8,8 @@ const CHANGE_VALIDATOR_ADDRESS = 0x1001;
 export async function changeValidator(
   sender: Sender,
   singleNominatorAddr: string,
-  newValidatorAddr: string
+  newValidatorAddr: string,
+  oldValidatorAddress: string
 ) {
   const payload = beginCell()
     .storeUint(CHANGE_VALIDATOR_ADDRESS, 32)
@@ -21,16 +23,23 @@ export async function changeValidator(
     sendMode: 1 + 2,
     body: payload,
   });
+  
+  return waitForConditionChange(async () => {
+    (await roles(singleNominatorAddr)).validatorAddress;
+  }, oldValidatorAddress);
 }
 
-export async function roles(
-  sender: Sender,
-  client: TonClient,
-  singleNominatorAddr: string,
-  newValidatorAddr: string
-) {
-  return await client.runMethod(
+export async function roles(singleNominatorAddr: string) {
+  const client = await getClientV2();
+  const res = await client.runMethod(
     Address.parse(singleNominatorAddr),
     "get_roles"
   );
+  const owner = res.stack.readAddress();
+  const validatorAddress = res.stack.readAddress();
+
+  return {
+    owner: owner.toString(),
+    validatorAddress: validatorAddress.toString(),
+  };
 }

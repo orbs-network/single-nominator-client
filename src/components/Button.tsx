@@ -8,7 +8,8 @@ export function Button({
   isLoading,
   connectionRequired,
   onClick,
-  className = ''
+  className = "",
+  disabled,
 }: {
   children: ReactNode;
   type?: "submit" | "button";
@@ -16,6 +17,7 @@ export function Button({
   connectionRequired?: boolean;
   onClick?: () => void;
   className?: string;
+  disabled?: boolean;
 }) {
   const tonAddress = useTonAddress();
   const [tonConnect] = useTonConnectUI();
@@ -36,6 +38,7 @@ export function Button({
       type={connectMode ? "button" : type}
       $isLoading={isLoading}
       onClick={handleClick}
+      $disabled={disabled}
     >
       {isLoading && <StyledSpinner />}
       <Children $hide={isLoading}>
@@ -62,14 +65,18 @@ const Children = styled("div")<{ $hide?: boolean }>`
   transition: opacity 0.2s;
 `;
 
-const StyledButton = styled("button")<{ $isLoading?: boolean }>`
-  pointer-events: ${({ $isLoading }) => ($isLoading ? "none" : "all")};
-  opacity: ${({ $isLoading }) => ($isLoading ? 0.8 : 1)};
+const StyledButton = styled("button")<{
+  $isLoading?: boolean;
+  $disabled?: boolean;
+}>`
+  pointer-events: ${({ $isLoading, $disabled }) =>
+    $isLoading || $disabled ? "none" : "all"};
+  opacity: ${({ $isLoading, $disabled }) => ($isLoading || $disabled ? 0.8 : 1)};
   position: relative;
   height: 44px;
   border-radius: 40px;
   background: ${({ theme }) => theme.colors.blue};
-  box-shadow:0 4px 24px rgba(0,0,0, 0.16);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.16);
   border: 1px solid transparent;
   cursor: pointer;
   position: relative;

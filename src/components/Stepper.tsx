@@ -29,8 +29,15 @@ export function Stepper({ steps, currentStep, header, setStep }: Props) {
             if (!step.title) return null;
             const finished = currentStep > index;
             const isCurrent = currentStep === index;
+
+            const onSetStep = () => {
+              if (finished) {
+                setStep(index);
+              }
+            }
+
             return (
-              <Step key={index} onClick={() => setStep(index)}>
+              <Step key={index} onClick={onSetStep}>
                 <Indicator $done={finished}>
                   {finished && <BsCheckLg style={{ color: "white" }} />}
                   {isCurrent && <Dot />}
@@ -57,7 +64,7 @@ const Menu = styled(Container)`
 `;
 
 const StepComponent = styled.div`
-  flex: 1;
+  width: calc(100% - 270px);
   ${MOBILE_MEDIA_QUERY} {
     width: 100%;
   }
@@ -96,7 +103,9 @@ const MenuSteps = styled.div`
 `;
 
 const Indicator = styled.div<{ $done: boolean }>`
-  position: relative;
+  position: absolute;
+  top: 0px;
+  left: 0px;
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -117,9 +126,10 @@ const Step = styled.div`
   justify-content: flex-start;
   position: relative;
   width: auto;
-  flex: 1;
   align-items: center;
-
+  padding-left: 45px;
+  min-height: 34px;
+ 
   & p {
     font-size: 14px;
     line-height: 20px;
@@ -137,3 +147,20 @@ const StyledContainer = styled.div`
     flex-direction: column;
   }
 `;
+
+
+export const StepContainer = styled(Container)``;
+export const StepTitle = styled.h2`
+  margin-bottom: 20px;
+  width: 100%;
+  color: ${({ theme }) => theme.text.title};
+`;
+
+export const StepSubtitle = styled(Typography)({
+  fontSize: "16px",
+  lineHeight: "22px",
+});
+
+Stepper.Step = StepContainer;
+Stepper.StepTitle = StepTitle;
+Stepper.StepSubtitle = StepSubtitle;

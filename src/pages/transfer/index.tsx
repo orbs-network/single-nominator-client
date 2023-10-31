@@ -1,9 +1,10 @@
-import { Input, Page } from "components";
-import React from "react";
+import { Input, Page, TxError, TxSuccess } from "components";
+import React, {useState } from "react";
 import { Container, InputsContainer, SubmitButton } from "styles";
 import { useForm, Controller } from "react-hook-form";
 import { isTonAddress, parseFormInputError } from "utils";
 import { useTransferFundsTx } from "hooks";
+import { useNavigate } from "react-router-dom";
 
 const inputs = [
   {
@@ -29,12 +30,59 @@ type FormValues = {
   amount: string;
 };
 
+
+
 function TransferPage() {
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+
+  return (
+    <Page title="Deposit">
+      <Container>
+        {error ? (
+          <Error error={error} />
+        ) : success ? (
+          <Success />
+        ) : (
+          <Form setError={setError} setSuccess={() => setSuccess(true)} />
+        )}{" "}
+      </Container>
+    </Page>
+  );
+}
+
+const Error = ({ error }: { error: string}) => {
+  return (
+    <TxError
+      btnText="Try again"
+      text={error}
+      onClick={() => window.location.reload()}
+    />
+  );
+};
+
+const Success = () => {
+  const navigate = useNavigate();
+  return (
+    <TxSuccess
+      text="Deposited successfully"
+      btnText="Home"
+      onClick={() => navigate("/")}
+    />
+  );
+};
+
+const Form = ({
+  setError,
+  setSuccess,
+}: {
+  setError: (value: string) => void;
+  setSuccess: () => void;
+}) => {
   const {
     control,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm({
     mode: "onSubmit",
     reValidateMode: "onChange",
@@ -46,53 +94,43 @@ function TransferPage() {
     mutate({
       address: data.address,
       amount: data.amount,
-      onSuccess: reset,
+      onSuccess: setSuccess,
+      onError: setError,
     });
   };
 
   return (
-    <Page title="Deposit">
-      <Container>
-        <form onSubmit={handleSubmit((data) => onSubmit(data as FormValues))}>
-          <InputsContainer>
-            {inputs.map((input) => {
-              return (
-                <Controller
-                  name={input.name}
-                  control={control}
-                  key={input.name}
-                  rules={{ required: input.required, validate: input.validate }}
-                  render={({ field }) => {
-                    const error = errors[input.name];
-                    const errorMsg = parseFormInputError(
-                      error?.type,
-                      input.error
-                    );
-                    return (
-                      <Input
-                        type={input.type}
-                        info={input.info}
-                        label={input.label}
-                        field={field}
-                        error={errorMsg}
-                      />
-                    );
-                  }}
-                />
-              );
-            })}
-            <SubmitButton
-              connectionRequired
-              isLoading={isLoading}
-              type="submit"
-            >
-              Proceed
-            </SubmitButton>
-          </InputsContainer>
-        </form>
-      </Container>
-    </Page>
+    <form onSubmit={handleSubmit((data) => onSubmit(data as FormValues))}>
+      <InputsContainer>
+        {inputs.map((input) => {
+          return (
+            <Controller
+              name={input.name}
+              control={control}
+              key={input.name}
+              rules={{ required: input.required, validate: input.validate }}
+              render={({ field }) => {
+                const error = errors[input.name];
+                const errorMsg = parseFormInputError(error?.type, input.error);
+                return (
+                  <Input
+                    type={input.type}
+                    info={input.info}
+                    label={input.label}
+                    field={field}
+                    error={errorMsg}
+                  />
+                );
+              }}
+            />
+          );
+        })}
+        <SubmitButton connectionRequired isLoading={isLoading} type="submit">
+          Proceed
+        </SubmitButton>
+      </InputsContainer>
+    </form>
   );
-}
+};
 
 export default TransferPage;
