@@ -1,3 +1,4 @@
+import { TELERGAM_SUPPORT } from "consts";
 import React, { ReactNode } from "react";
 import styled from "styled-components";
 import { H1, Typography } from "styles";
@@ -22,8 +23,10 @@ const Footer = () => {
   return (
     <StyledFooter>
       <Typography>
-        To receive support for using single-nominator contact the team on{' '}
-        <a target='_blank' href="https://t.me/tonlabs">Telegram</a>
+        To receive support for using single-nominator contact the team on{" "}
+        <a target="_blank" href={TELERGAM_SUPPORT}>
+          Telegram
+        </a>
       </Typography>
     </StyledFooter>
   );

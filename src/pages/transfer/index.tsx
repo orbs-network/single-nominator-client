@@ -3,7 +3,7 @@ import React, {useState } from "react";
 import { Container, InputsContainer, SubmitButton } from "styles";
 import { useForm, Controller } from "react-hook-form";
 import { isTonAddress, parseFormInputError } from "utils";
-import { useTransferFundsTx } from "hooks";
+import { useRoles, useTransferFundsTx, useValidateSingleNominator } from "hooks";
 import { useNavigate } from "react-router-dom";
 
 const inputs = [
@@ -65,7 +65,7 @@ const Success = () => {
   const navigate = useNavigate();
   return (
     <TxSuccess
-      text="Deposited successfully"
+      text="Funds successfully transferred!"
       btnText="Home"
       onClick={() => navigate("/")}
     />
@@ -83,12 +83,19 @@ const Form = ({
     control,
     handleSubmit,
     formState: { errors },
+    watch
   } = useForm({
     mode: "onSubmit",
     reValidateMode: "onChange",
   });
 
+  const snAddress = watch("address");
+
   const { mutate, isLoading } = useTransferFundsTx();
+
+  const {data: roles} = useRoles(snAddress);
+  const { data: isSNAddress, isLoading: isSNAddressLoading } =
+    useValidateSingleNominator(snAddress);
 
   const onSubmit = (data: FormValues) => {
     mutate({
@@ -125,8 +132,13 @@ const Form = ({
             />
           );
         })}
-        <SubmitButton connectionRequired isLoading={isLoading} type="submit">
-          Proceed
+        <SubmitButton
+          disabled={!isSNAddress || isSNAddressLoading}
+          connectionRequired
+          isLoading={isLoading}
+          type="submit"
+        >
+          Deposit
         </SubmitButton>
       </InputsContainer>
     </form>

@@ -13,7 +13,6 @@ export async function withdraw(
   amount?: number
 ) {
   const client = await getClientV2();
-  console.log(singleNominatorAddr, amount, client);
 
   let _amount;
   if (!amount) {
@@ -33,6 +32,7 @@ export async function withdraw(
   const oldBalance = (
     await client.getBalance(Address.parse(singleNominatorAddr))
   ).toString();
+  console.log(singleNominatorAddr, amount, client, 'sending withdraw');
 
   await sender.send({
     to: Address.parse(singleNominatorAddr),

@@ -152,7 +152,7 @@ const Form = ({
         })}
 
         <SubmitButton connectionRequired isLoading={isLoading} type="submit">
-          Proceed
+          Withdraw
         </SubmitButton>
       </InputsContainer>
     </form>

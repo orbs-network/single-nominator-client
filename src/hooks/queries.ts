@@ -1,6 +1,6 @@
 import { transferFunds } from "helpers/transfer-funds";
 import { withdraw } from "helpers/withdraw";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useGetSender } from "./common";
 import { changeValidator, roles } from "helpers/change-validator";
 import { deploy } from "helpers/deploy";
@@ -38,7 +38,7 @@ export const useWithdrawTx = () => {
 export const useTransferFundsTx = () => {
   const getSender = useGetSender();
   return useMutation(
-    (data: {
+    async (data: {
       address: string;
       amount: string;
       onSuccess?: () => void;
@@ -172,5 +172,52 @@ export const useSingleNominatorBalance = (address?: string) => {
     queryKey: ["useSingleNominatorBalance", address],
     enabled: !!address && isTonAddress(address),
     refetchInterval: 5_000
+  });
+};
+
+
+export const useValidateSingleNominator = (address?: string) => {
+  return useQuery({
+    queryKey: ["useValidateSingleNominator", address],
+    queryFn: async () => {
+      return isMatchSingleNominatorCodeHash(address!);
+    },
+    enabled: !!address && isTonAddress(address),
+  });
+};
+
+
+export const useValidateRoles = () => {
+  const queyClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      snAddress,
+      onwerAddress,
+      validatorAddress,
+    }: {
+      snAddress: string;
+      onwerAddress: string;
+      validatorAddress: string;
+      onError?: (error: string) => void;
+      onSuccess?: () => void;
+    }) => {
+      const result = await queyClient.ensureQueryData(["useRoles", snAddress], () => roles(snAddress));
+      console.log({ result });
+      
+      if (
+        result.owner !== onwerAddress ||
+        result.validatorAddress !== validatorAddress
+      ) {
+        throw new Error("Invalid data");
+      }
+    },
+    onSuccess: (data, args) => {
+      args.onSuccess?.();
+    },
+    onError: (error, args) => {
+      if (error instanceof Error) {
+        args.onError?.(error.message);
+      }
+    },
   });
 };

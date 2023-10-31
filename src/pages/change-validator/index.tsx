@@ -1,5 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AddressDisplay, Input, Page, Stepper, TxError, TxSuccess } from "components";
+import {
+  AddressDisplay,
+  Input,
+  Page,
+  Stepper,
+  TxError,
+  TxSuccess,
+} from "components";
 import { ColumnFlex, SubmitButton, Typography } from "styles";
 import { useForm, Controller } from "react-hook-form";
 import { isTonAddress, parseFormInputError } from "utils";
@@ -9,6 +16,7 @@ import styled from "styled-components";
 import { useMemo, useState } from "react";
 import { useStore } from "./store";
 import { useNavigate } from "react-router-dom";
+import { ZERO_ADDR } from "consts";
 
 const snInput = {
   label: "",
@@ -79,7 +87,7 @@ const SnAddress = () => {
             }}
           />
           <SubmitButton connectionRequired type="submit">
-            Proceed
+            Next
           </SubmitButton>
         </ColumnFlex>
       </form>
@@ -126,7 +134,7 @@ const Roles = () => {
           connectionRequired
           disabled={isLoading}
         >
-          Proceed
+          Next
         </SubmitButton>
       )}
     </Stepper.Step>
@@ -136,17 +144,20 @@ const Roles = () => {
 const NewValidatorAddress = () => {
   const { setFromValues, nextStep, snAddress, reset } = useStore();
   const { mutate, isLoading } = useChangeValidatorTx();
-  const [error, setError] = useState('')
+  const [error, setError] = useState("");
   const { data } = useRoles(snAddress);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm({
     mode: "onSubmit",
     reValidateMode: "onChange",
   });
+
+  const address = watch("newValidatorAddress");
 
   const onSubmit = ({
     newValidatorAddress,
@@ -169,7 +180,7 @@ const NewValidatorAddress = () => {
     <Stepper.Step>
       <Stepper.StepTitle>Enter new validator address</Stepper.StepTitle>
       {error ? (
-        <TxError btnText="Try again" text={error} onClick={reset}  />
+        <TxError btnText="Try again" text={error} onClick={reset} />
       ) : (
         <form
           onSubmit={handleSubmit((data) =>
@@ -196,6 +207,16 @@ const NewValidatorAddress = () => {
                     field={field}
                     error={errorMsg}
                     info={newValidatorAddress.info}
+                    button={
+                      !address && (
+                        <StyledZeroButton
+                          type="button"
+                          onClick={() => field.onChange(ZERO_ADDR)}
+                        >
+                          Zero address
+                        </StyledZeroButton>
+                      )
+                    }
                   />
                 );
               }}
@@ -205,7 +226,7 @@ const NewValidatorAddress = () => {
               type="submit"
               isLoading={isLoading}
             >
-              Proceed
+              Set validator
             </SubmitButton>
           </ColumnFlex>
         </form>
@@ -214,13 +235,21 @@ const NewValidatorAddress = () => {
   );
 };
 
+const StyledZeroButton = styled.button`
+ 
+`;
+
 const Success = () => {
   const navigate = useNavigate();
+  const { reset } = useStore();
   return (
     <Stepper.Step>
       <Stepper.StepTitle>Success</Stepper.StepTitle>
       <TxSuccess
-        onClick={() => navigate("/")}
+        onClick={() => {
+          navigate("/");
+          reset();
+        }}
         text="Validator changed"
         btnText="Home"
       />
@@ -230,15 +259,15 @@ const Success = () => {
 
 const steps = [
   {
-    title: "Single nominator address",
+    title: "Enter single nominator address",
     component: <SnAddress />,
   },
   {
-    title: "Roles",
+    title: "Read roles",
     component: <Roles />,
   },
   {
-    title: "New validator address",
+    title: "Set new validator address",
     component: <NewValidatorAddress />,
   },
   {

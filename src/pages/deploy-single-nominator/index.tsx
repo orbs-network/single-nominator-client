@@ -13,29 +13,43 @@ import { parseFormInputError } from "utils";
 import { Controller, useForm } from "react-hook-form";
 import {
   useDeploySingleNominatorTx,
-  useSingleNominatorBalance,
+  useRoles,
   useTransferFundsTx,
+  useValidateRoles,
   useVerifySNAddress,
   useWithdrawTx,
 } from "hooks";
 import { FormValues, inputs, useStore } from "./store";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { BottomText, StyledAddresses, StyledWithdrawActions } from "./styles";
-import BN from "bignumber.js";
+import { ZERO_ADDR } from "consts";
+import { showSuccessToast } from "toasts";
 
 export const Addresses = () => {
   const { ownerAddress, validatorAddress, snAddress } = useStore();
   return (
     <StyledAddresses $gap={20}>
+      {snAddress && (
+        <AddressDisplay title="Single nominator" address={snAddress} />
+      )}
       {ownerAddress && <AddressDisplay title="Owner" address={ownerAddress} />}
       {validatorAddress && (
         <AddressDisplay title="Validator" address={validatorAddress} />
       )}
-      {snAddress && (
-        <AddressDisplay title="Single nominator" address={snAddress} />
-      )}
     </StyledAddresses>
   );
+};
+
+const ZeroButton = ({
+  name,
+  onChange,
+}: {
+  name: string;
+  onChange: (value: string) => void;
+}) => {
+  if (name !== "validatorAddress") return null;
+
+  return <button onClick={() => onChange(ZERO_ADDR)}>Zero address</button>;
 };
 
 const FirstStep = () => {
@@ -51,6 +65,7 @@ const FirstStep = () => {
 
   return (
     <Stepper.Step>
+      <Stepper.StepTitle>Set owner and validator addresses</Stepper.StepTitle>
       <form
         onSubmit={handleSubmit((data) => setFromValues(data as FormValues))}
       >
@@ -74,6 +89,14 @@ const FirstStep = () => {
                         label={input.label}
                         field={field}
                         error={errorMsg}
+                        button={
+                          !field.value && (
+                            <ZeroButton
+                              name={input.name}
+                              onChange={field.onChange}
+                            />
+                          )
+                        }
                       />
                     );
                   }}
@@ -82,7 +105,7 @@ const FirstStep = () => {
             })}
           </InputsContainer>
           <SubmitButton connectionRequired type="submit">
-            Proceed
+            Next
           </SubmitButton>
         </ColumnFlex>
       </form>
@@ -103,6 +126,7 @@ const SecondStep = () => {
       validator: validatorAddress,
       onSuccess: (snAddress: string) => {
         console.log({ snAddress });
+        
         setFromValues({
           snAddress,
         });
@@ -134,22 +158,69 @@ const SecondStep = () => {
   );
 };
 
-const VerifyStep = () => {
+const VerifyDataStep = () => {
+  const store = useStore();
+  const { nextStep, snAddress, reset } = store;
   const [error, setError] = useState("");
-  const { mutate, isLoading } = useVerifySNAddress();
-  const { nextStep, snAddress, reset } = useStore();
+  const { mutate, isLoading } = useValidateRoles();
 
   const onSubmit = () => {
     mutate({
       snAddress,
-      onSuccess: nextStep,
+      onwerAddress: store.ownerAddress,
+      validatorAddress: store.validatorAddress,
+      onError: setError,
+      onSuccess: () => {
+        nextStep();
+        showSuccessToast("Data is valid");
+      },
+    });
+  };
+
+  return (
+    <Stepper.Step>
+      <Stepper.StepTitle>Verify data</Stepper.StepTitle>
+      <Stepper.StepSubtitle>
+        After deployment is complete, this step will read the code hash from
+        single-nominator contract that was just deployed and compare it to the
+        code hash of the audited version.
+      </Stepper.StepSubtitle>
+
+      {error ? (
+        <TxError text={error} onClick={reset} btnText="Try again" />
+      ) : (
+        <>
+          <Addresses />
+          <SubmitButton onClick={onSubmit} isLoading={isLoading}>
+            Verify
+          </SubmitButton>
+        </>
+      )}
+    </Stepper.Step>
+  );
+};
+
+const VerifyCodeHashStep = () => {
+  const [error, setError] = useState("");
+  const { mutate, isLoading } = useVerifySNAddress();
+  const { nextStep, snAddress, reset } = useStore();
+
+  const { data: roles, isLoading: rolesLoading } = useRoles(snAddress);
+
+  const onSubmit = () => {
+    mutate({
+      snAddress,
+      onSuccess: () => {
+        nextStep();
+        showSuccessToast("Code hash is valid");
+      },
       onError: setError,
     });
   };
 
   return (
     <Stepper.Step>
-      <Stepper.StepTitle>Verify</Stepper.StepTitle>
+      <Stepper.StepTitle>Verify Codehash</Stepper.StepTitle>
       <Stepper.StepSubtitle>
         After deployment is complete, this step will read the code hash from
         single-nominator contract that was just deployed and compare it to the
@@ -159,7 +230,19 @@ const VerifyStep = () => {
         <TxError btnText="Try again" text={error} onClick={reset} />
       ) : (
         <>
-          <Addresses />
+          <StyledAddresses $gap={20}>
+            <AddressDisplay title="Single nominator" address={snAddress} />
+            <AddressDisplay
+              isLoading={rolesLoading}
+              title="Owner"
+              address={roles?.owner}
+            />
+            <AddressDisplay
+              isLoading={rolesLoading}
+              title="Validator"
+              address={roles?.validatorAddress}
+            />
+          </StyledAddresses>
           <SubmitButton onClick={onSubmit} isLoading={isLoading}>
             Verify
           </SubmitButton>
@@ -191,12 +274,14 @@ export const WithdrawStep = () => {
 
   const { nextStep, snAddress, reset } = useStore();
 
-
   const onWithdraw = () =>
     withdraw({
       address: snAddress,
       amount: WITHDRAW_STEP_AMOUNT,
       onError: setError,
+      onSuccess: () => {
+        showSuccessToast("Funds withdrawn");
+      }
     });
 
   const depositFunds = () =>
@@ -204,6 +289,9 @@ export const WithdrawStep = () => {
       address: snAddress,
       amount: WITHDRAW_STEP_AMOUNT.toString(),
       onError: setError,
+      onSuccess: () => {
+        showSuccessToast("Funds deposited");
+      }
     });
 
   return (
@@ -220,10 +308,10 @@ export const WithdrawStep = () => {
         <>
           <StyledWithdrawActions>
             <Button isLoading={withdrawLoading} onClick={onWithdraw}>
-              Withdraw 5 TON
+              Withdraw {WITHDRAW_STEP_AMOUNT} TON
             </Button>
             <Button isLoading={depositLoading} onClick={depositFunds}>
-              Deposit 5 TON
+              Deposit {WITHDRAW_STEP_AMOUNT} TON
             </Button>
           </StyledWithdrawActions>
           <BottomText>
@@ -232,9 +320,7 @@ export const WithdrawStep = () => {
             higher. Then withdraw and verify that Owner wallet receives the
             funds back.
           </BottomText>
-          <SubmitButton  onClick={nextStep}>
-            Finish
-          </SubmitButton>
+          <SubmitButton onClick={nextStep}>Finish</SubmitButton>
         </>
       )}
     </Stepper.Step>
@@ -243,7 +329,7 @@ export const WithdrawStep = () => {
 
 const steps = [
   {
-    title: "Enter data",
+    title: "Set owner and validator addresses",
     component: <FirstStep />,
   },
   {
@@ -251,8 +337,12 @@ const steps = [
     component: <SecondStep />,
   },
   {
-    title: "Verify",
-    component: <VerifyStep />,
+    title: "Verify Data",
+    component: <VerifyDataStep />,
+  },
+  {
+    title: "Verify Codehash",
+    component: <VerifyCodeHashStep />,
   },
   {
     title: "Withdraw",

@@ -53,7 +53,6 @@ async function getDeployCodeAndData(owner: Address, validator: Address) {
 
 export async function deploy(sender: Sender, owner: string, validator: string) {
   const client = await getClientV2();
-
   const singleNominatorCodeAndData = await getDeployCodeAndData(
     Address.parse(owner),
     Address.parse(validator)
@@ -62,7 +61,13 @@ export async function deploy(sender: Sender, owner: string, validator: string) {
     code: singleNominatorCodeAndData?.code,
     data: singleNominatorCodeAndData?.data,
   });
-
+  const isDeployed = await client.isContractDeployed(singleNominatorAddress);
+  if (isDeployed) {
+    return {
+      success: true,
+      singleNominatorAddress: singleNominatorAddress.toString(),
+    };
+  }
   await sender.send({
     to: singleNominatorAddress,
     value: MSG_VALUE,
@@ -79,5 +84,3 @@ export async function deploy(sender: Sender, owner: string, validator: string) {
     singleNominatorAddress: singleNominatorAddress.toString(),
   };
 }
-
-

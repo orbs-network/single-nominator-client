@@ -21,7 +21,7 @@ export const showToast = (message: string, config?: ToastConfig) => {
 export const showSuccessToast = (message: string) => {
   toast.dismiss();
   toast.success(() => <ToastContent message={message} />, {
-    duration: 7000,
+    duration: 10_000,
   });
 };
 
