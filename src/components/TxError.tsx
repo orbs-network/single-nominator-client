@@ -41,6 +41,7 @@ const Text = styled(Typography)`
 
 const Container = styled(ColumnFlex)`
   align-items: center;
+  padding-top: 30px;
   gap: 30px;
   .button {
     min-width: 200px;

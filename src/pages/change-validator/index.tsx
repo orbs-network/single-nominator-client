@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AddressDisplay, Input, Page, Stepper, TxSuccess } from "components";
+import { AddressDisplay, Input, Page, Stepper, TxError, TxSuccess } from "components";
 import { ColumnFlex, SubmitButton, Typography } from "styles";
 import { useForm, Controller } from "react-hook-form";
 import { isTonAddress, parseFormInputError } from "utils";
 import { useChangeValidatorTx, useRoles } from "hooks";
 import { useTonAddress } from "@tonconnect/ui-react";
 import styled from "styled-components";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useStore } from "./store";
 import { useNavigate } from "react-router-dom";
 
@@ -90,7 +90,6 @@ const SnAddress = () => {
 const Roles = () => {
   const { snAddress, nextStep, prevStep } = useStore();
   const tonAddress = useTonAddress();
-  console.log(snAddress);
 
   const { data: roles, isLoading } = useRoles(snAddress);
   const owner = roles?.owner;
@@ -135,8 +134,9 @@ const Roles = () => {
 };
 
 const NewValidatorAddress = () => {
-  const { setFromValues, nextStep, snAddress } = useStore();
+  const { setFromValues, nextStep, snAddress, reset } = useStore();
   const { mutate, isLoading } = useChangeValidatorTx();
+  const [error, setError] = useState('')
   const { data } = useRoles(snAddress);
 
   const {
@@ -160,47 +160,56 @@ const NewValidatorAddress = () => {
       address: snAddress,
       newAddress: newValidatorAddress,
       oldValidatorAddress: data!.validatorAddress!,
-      onSuccess: nextStep
+      onSuccess: nextStep,
+      onError: setError,
     });
   };
 
   return (
     <Stepper.Step>
       <Stepper.StepTitle>Enter new validator address</Stepper.StepTitle>
-      <form
-        onSubmit={handleSubmit((data) =>
-          onSubmit(data as { newValidatorAddress: string })
-        )}
-      >
-        <ColumnFlex $noGap>
-          <Controller
-            name={newValidatorAddress.name}
-            control={control}
-            key={newValidatorAddress.name}
-            rules={{
-              required: newValidatorAddress.required,
-              validate: newValidatorAddress.validate,
-            }}
-            render={({ field }) => {
-              const errorMsg = parseFormInputError(
-                errors[newValidatorAddress.name]?.type,
-                newValidatorAddress.error
-              );
-              return (
-                <Input
-                  label={newValidatorAddress.label}
-                  field={field}
-                  error={errorMsg}
-                  info={newValidatorAddress.info}
-                />
-              );
-            }}
-          />
-          <SubmitButton connectionRequired type="submit" isLoading={isLoading}>
-            Proceed
-          </SubmitButton>
-        </ColumnFlex>
-      </form>
+      {error ? (
+        <TxError btnText="Try again" text={error} onClick={reset}  />
+      ) : (
+        <form
+          onSubmit={handleSubmit((data) =>
+            onSubmit(data as { newValidatorAddress: string })
+          )}
+        >
+          <ColumnFlex $noGap>
+            <Controller
+              name={newValidatorAddress.name}
+              control={control}
+              key={newValidatorAddress.name}
+              rules={{
+                required: newValidatorAddress.required,
+                validate: newValidatorAddress.validate,
+              }}
+              render={({ field }) => {
+                const errorMsg = parseFormInputError(
+                  errors[newValidatorAddress.name]?.type,
+                  newValidatorAddress.error
+                );
+                return (
+                  <Input
+                    label={newValidatorAddress.label}
+                    field={field}
+                    error={errorMsg}
+                    info={newValidatorAddress.info}
+                  />
+                );
+              }}
+            />
+            <SubmitButton
+              connectionRequired
+              type="submit"
+              isLoading={isLoading}
+            >
+              Proceed
+            </SubmitButton>
+          </ColumnFlex>
+        </form>
+      )}
     </Stepper.Step>
   );
 };

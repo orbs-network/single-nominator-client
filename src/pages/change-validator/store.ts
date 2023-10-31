@@ -4,7 +4,7 @@ enum Steps {
   SINGLE_NOMINATOR_ADDRESS,
   DISPLAY_ROLES,
   NEW_VALIDATOR_ADDRESS,
-  SUCCESS
+  SUCCESS,
 }
 
 interface FormValues {
@@ -17,7 +17,7 @@ interface Store extends FormValues {
   setFromValues: (value: Partial<FormValues>) => void;
   reset: () => void;
   setStep: (step: Steps) => void;
-prevStep: () => void;
+  prevStep: () => void;
 }
 
 export const useStore = create<Store>((set) => ({

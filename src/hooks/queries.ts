@@ -3,7 +3,6 @@ import { withdraw } from "helpers/withdraw";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useGetSender } from "./common";
 import { changeValidator, roles } from "helpers/change-validator";
-import { showErrorToast } from "toasts";
 import { deploy } from "helpers/deploy";
 import { isTonAddress } from "utils";
 import { isMatchSingleNominatorCodeHash } from "helpers/util";
@@ -19,7 +18,7 @@ export const useWithdrawTx = () => {
       amount?: number;
       onSuccess?: () => void;
       onError?: (value: string) => void;
-    }) => {      
+    }) => {
       return withdraw(getSender(), address, amount);
     },
     {
@@ -38,12 +37,13 @@ export const useWithdrawTx = () => {
 export const useTransferFundsTx = () => {
   const getSender = useGetSender();
   return useMutation(
-    (data: { address: string; amount: string, onSuccess?: () => void, onError?: (value: string) => void}) => {
-      return transferFunds(
-        getSender(),
-        data.address,
-        Number(data.amount),
-      );
+    (data: {
+      address: string;
+      amount: string;
+      onSuccess?: () => void;
+      onError?: (value: string) => void;
+    }) => {
+      return transferFunds(getSender(), data.address, Number(data.amount));
     },
     {
       onSuccess: (data, args) => {
@@ -70,6 +70,7 @@ export const useChangeValidatorTx = () => {
       newAddress: string;
       oldValidatorAddress: string;
       onSuccess?: () => void;
+      onError?: (value: string) => void;
     }) => {
       return changeValidator(
         getSender(),
@@ -82,9 +83,9 @@ export const useChangeValidatorTx = () => {
       onSuccess: (data, args) => {
         args.onSuccess?.();
       },
-      onError: (error) => {
+      onError: (error, args) => {
         if (error instanceof Error) {
-          showErrorToast(error.message);
+          args.onError?.(error.message);
         }
       },
     }
@@ -101,6 +102,7 @@ export const useDeploySingleNominatorTx = () => {
       owner: string;
       validator: string;
       onSuccess: (value: string) => void;
+      onError?: (value: string) => void;
     }) => {
       const result = await deploy(getSender(), owner, validator);
       if (!result.success) {
@@ -109,9 +111,9 @@ export const useDeploySingleNominatorTx = () => {
       return result.singleNominatorAddress;
     },
     {
-      onError: (error) => {
+      onError: (error, args) => {
         if (error instanceof Error) {
-          showErrorToast(error.message);
+          args.onError?.(error.message);
         }
       },
       onSuccess: (singleNominatorAddress, args) => {
@@ -123,7 +125,13 @@ export const useDeploySingleNominatorTx = () => {
 
 export const useVerifySNAddress = () => {
   return useMutation(
-    async ({ snAddress }: { snAddress: string; onSuccess: () => void }) => {
+    async ({
+      snAddress,
+    }: {
+      snAddress: string;
+      onSuccess: () => void;
+      onError?: (value: string) => void;
+    }) => {
       const result = await isMatchSingleNominatorCodeHash(snAddress);
       if (!result) {
         throw new Error("Not match");
@@ -134,19 +142,16 @@ export const useVerifySNAddress = () => {
       onSuccess: (result, args) => {
         args.onSuccess();
       },
-      onError: (error) => {
+      onError: (error, args) => {
         if (error instanceof Error) {
-          showErrorToast(error.message);
+          args.onError?.(error.message);
         }
       },
     }
   );
 };
 
-
-
 export const useRoles = (address?: string) => {
-
   return useQuery({
     queryKey: ["useRoles", address],
     queryFn: async () => {
@@ -154,4 +159,4 @@ export const useRoles = (address?: string) => {
     },
     enabled: !!address && isTonAddress(address),
   });
-}
+};
