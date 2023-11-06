@@ -3,7 +3,7 @@ import React, {useState } from "react";
 import { Container, InputsContainer, SubmitButton } from "styles";
 import { useForm, Controller } from "react-hook-form";
 import { isTonAddress, parseFormInputError } from "utils";
-import { useRoles, useTransferFundsTx, useValidateSingleNominator } from "hooks";
+import {  useTransferFundsTx, useValidateSingleNominator } from "hooks";
 import { useNavigate } from "react-router-dom";
 
 const inputs = [
@@ -93,7 +93,6 @@ const Form = ({
 
   const { mutate, isLoading } = useTransferFundsTx();
 
-  const {data: roles} = useRoles(snAddress);
   const { data: isSNAddress, isLoading: isSNAddressLoading } =
     useValidateSingleNominator(snAddress);
 
