@@ -20,8 +20,8 @@ export const showToast = (message: string, config?: ToastConfig) => {
 
 export const showSuccessToast = (message: string) => {
   toast.dismiss();
-  toast.success(() => <ToastContent message={message} />, {
-    duration: 10_000,
+  toast.success((t) => <ToastContent key={t.id} message={message} />, {
+    duration: 5_000,
   });
 };
 

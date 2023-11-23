@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   AddressDisplay,
+  Button,
   Input,
+  ModalErrorContent,
   Page,
   Stepper,
-  TxError,
   TxSuccess,
 } from "components";
 import { ColumnFlex, SubmitButton, Typography } from "styles";
@@ -13,10 +14,12 @@ import { isTonAddress, parseFormInputError } from "utils";
 import { useChangeValidatorTx, useRoles } from "hooks";
 import { useTonAddress } from "@tonconnect/ui-react";
 import styled from "styled-components";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useStore } from "./store";
 import { useNavigate } from "react-router-dom";
 import { ZERO_ADDR } from "consts";
+import { Modal } from "antd";
+import { isEqualAddresses } from "helpers/util";
 
 const snInput = {
   label: "",
@@ -103,28 +106,26 @@ const Roles = () => {
   const owner = roles?.owner;
 
   const invalidOnwer = useMemo(() => {
-    if (!owner || !tonAddress) {
-      return false;
-    }
-
-    return owner !== tonAddress;
+    return isEqualAddresses(owner, tonAddress);
   }, [tonAddress, owner]);
 
   return (
     <Stepper.Step>
       <Stepper.StepTitle>Roles</Stepper.StepTitle>
       <ColumnFlex $gap={30}>
-        <AddressDisplay
-          isLoading={isLoading}
-          title="Owner address"
-          address={roles?.owner}
-        />
-        <AddressDisplay
-          isLoading={isLoading}
-          title="Validator address"
-          address={roles?.validatorAddress}
-        />
-        {invalidOnwer && <Error />}
+        <>
+          <AddressDisplay
+            isLoading={isLoading}
+            title="Owner address"
+            address={roles?.owner}
+          />
+          <AddressDisplay
+            isLoading={isLoading}
+            title="Validator address"
+            address={roles?.validatorAddress}
+          />
+          {invalidOnwer && <Error />}
+        </>
       </ColumnFlex>
       {invalidOnwer ? (
         <SubmitButton onClick={prevStep}>Back</SubmitButton>
@@ -142,9 +143,8 @@ const Roles = () => {
 };
 
 const NewValidatorAddress = () => {
-  const { setFromValues, nextStep, snAddress, reset } = useStore();
+  const { setFromValues, nextStep, snAddress } = useStore();
   const { mutate, isLoading } = useChangeValidatorTx();
-  const [error, setError] = useState("");
   const { data } = useRoles(snAddress);
 
   const {
@@ -159,6 +159,13 @@ const NewValidatorAddress = () => {
 
   const address = watch("newValidatorAddress");
 
+  const error = useCallback(() => {
+    Modal.error({
+      title: "Change validator address failed",
+      content: <ModalErrorContent />,
+    });
+  }, []);
+
   const onSubmit = ({
     newValidatorAddress,
   }: {
@@ -172,72 +179,62 @@ const NewValidatorAddress = () => {
       newAddress: newValidatorAddress,
       oldValidatorAddress: data!.validatorAddress!,
       onSuccess: nextStep,
-      onError: setError,
+      onError: error,
     });
   };
 
   return (
     <Stepper.Step>
       <Stepper.StepTitle>Enter new validator address</Stepper.StepTitle>
-      {error ? (
-        <TxError btnText="Try again" text={error} onClick={reset} />
-      ) : (
-        <form
-          onSubmit={handleSubmit((data) =>
-            onSubmit(data as { newValidatorAddress: string })
-          )}
-        >
-          <ColumnFlex $noGap>
-            <Controller
-              name={newValidatorAddress.name}
-              control={control}
-              key={newValidatorAddress.name}
-              rules={{
-                required: newValidatorAddress.required,
-                validate: newValidatorAddress.validate,
-              }}
-              render={({ field }) => {
-                const errorMsg = parseFormInputError(
-                  errors[newValidatorAddress.name]?.type,
-                  newValidatorAddress.error
-                );
-                return (
-                  <Input
-                    label={newValidatorAddress.label}
-                    field={field}
-                    error={errorMsg}
-                    info={newValidatorAddress.info}
-                    button={
-                      !address && (
-                        <StyledZeroButton
-                          type="button"
-                          onClick={() => field.onChange(ZERO_ADDR)}
-                        >
-                          Zero address
-                        </StyledZeroButton>
-                      )
-                    }
-                  />
-                );
-              }}
-            />
-            <SubmitButton
-              connectionRequired
-              type="submit"
-              isLoading={isLoading}
-            >
-              Set validator
-            </SubmitButton>
-          </ColumnFlex>
-        </form>
-      )}
+      <form
+        onSubmit={handleSubmit((data) =>
+          onSubmit(data as { newValidatorAddress: string })
+        )}
+      >
+        <ColumnFlex $noGap>
+          <Controller
+            name={newValidatorAddress.name}
+            control={control}
+            key={newValidatorAddress.name}
+            rules={{
+              required: newValidatorAddress.required,
+              validate: newValidatorAddress.validate,
+            }}
+            render={({ field }) => {
+              const errorMsg = parseFormInputError(
+                errors[newValidatorAddress.name]?.type,
+                newValidatorAddress.error
+              );
+              return (
+                <Input
+                  label={newValidatorAddress.label}
+                  field={field}
+                  error={errorMsg}
+                  info={newValidatorAddress.info}
+                  button={
+                    !address && (
+                      <StyledZeroButton
+                        type="button"
+                        onClick={() => field.onChange(ZERO_ADDR)}
+                      >
+                        Zero Address
+                      </StyledZeroButton>
+                    )
+                  }
+                />
+              );
+            }}
+          />
+          <SubmitButton connectionRequired type="submit" isLoading={isLoading}>
+            Set validator
+          </SubmitButton>
+        </ColumnFlex>
+      </form>
     </Stepper.Step>
   );
 };
 
-const StyledZeroButton = styled.button`
- 
-`;
+const StyledZeroButton = styled.button``;
 
 const Success = () => {
   const navigate = useNavigate();
@@ -246,12 +243,17 @@ const Success = () => {
     <Stepper.Step>
       <Stepper.StepTitle>Success</Stepper.StepTitle>
       <TxSuccess
-        onClick={() => {
-          navigate("/");
-          reset();
-        }}
+        button={
+          <Button
+            onClick={() => {
+              navigate("/");
+              reset();
+            }}
+          >
+            Home
+          </Button>
+        }
         text="Validator changed"
-        btnText="Home"
       />
     </Stepper.Step>
   );

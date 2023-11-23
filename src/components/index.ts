@@ -9,4 +9,4 @@ export * from './Tooltip'
 export * from './Skeleton'
 export * from "./AddressDisplay";
 export * from "./TxSuccess";
-export * from "./TxError";
+export * from "./Modal";

@@ -1,5 +1,5 @@
 import { useTonAddress, useTonConnectUI } from "@tonconnect/ui-react";
-import React, { ReactNode } from "react";
+import React, { CSSProperties, ReactNode } from "react";
 import styled from "styled-components";
 import { Spinner } from "./Spinner";
 export function Button({
@@ -10,6 +10,7 @@ export function Button({
   onClick,
   className = "",
   disabled,
+  style = {},
 }: {
   children: ReactNode;
   type?: "submit" | "button";
@@ -18,6 +19,7 @@ export function Button({
   onClick?: () => void;
   className?: string;
   disabled?: boolean;
+  style?: CSSProperties;
 }) {
   const tonAddress = useTonAddress();
   const [tonConnect] = useTonConnectUI();
@@ -34,6 +36,7 @@ export function Button({
 
   return (
     <StyledButton
+      style={style}
       className={`${className} button`}
       type={connectMode ? "button" : type}
       $isLoading={isLoading}

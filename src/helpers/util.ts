@@ -107,3 +107,10 @@ export const getBalance = async (address: string) => {
   const client = await getClientV2();
   return (await client.getBalance(Address.parse(address))).toString();
 };
+
+
+
+export const isEqualAddresses = (a?: string, b?: string) => {
+  if (!a || !b) return false;
+  return Address.parse(a).equals(Address.parse(b));
+};

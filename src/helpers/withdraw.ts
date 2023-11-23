@@ -15,12 +15,20 @@ export async function withdraw(
   const client = await getClientV2();
 
   let _amount;
+
+  const balance = await client.getBalance(Address.parse(singleNominatorAddr));
   if (!amount) {
-    _amount = parseFloat(
-      fromNano(await client.getBalance(Address.parse(singleNominatorAddr)))
-    );
+    _amount = parseFloat(fromNano(balance));
   } else {
     _amount = amount;
+  }
+
+  if (Number(_amount) > parseFloat(fromNano(balance))) {
+    throw new Error(
+      `Single nominator balance (${parseFloat(fromNano(balance)).toFixed(
+        2
+      )} TON) is less than ${_amount} TON`
+    );
   }
 
   const payload = beginCell()
@@ -32,7 +40,7 @@ export async function withdraw(
   const oldBalance = (
     await client.getBalance(Address.parse(singleNominatorAddr))
   ).toString();
-  console.log(singleNominatorAddr, amount, client, 'sending withdraw');
+  console.log(singleNominatorAddr, amount, client, "sending withdraw");
 
   await sender.send({
     to: Address.parse(singleNominatorAddr),

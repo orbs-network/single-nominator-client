@@ -11,8 +11,9 @@ import { compileFunc } from "@ton-community/func-js";
 import { Buffer } from "buffer";
 import { getClientV2 } from "helpers/client";
 import { waitForContractToBeDeployed } from "./util";
+import { DEPLOY_VALUE } from "consts";
 
-const MSG_VALUE = toNano(0.1);
+const MSG_VALUE = import.meta.env.DEV ? toNano(0.1) : toNano(DEPLOY_VALUE);
 
 async function getDeployCodeAndData(owner: Address, validator: Address) {
   const stdlibFileResponse = await fetch("src/contracts/stdlib.fc");

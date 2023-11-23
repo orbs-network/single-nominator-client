@@ -200,3 +200,6 @@ table {
 }
 
 
+.ant-modal-confirm-btns .ant-btn-primary{
+  background: #0098E9;
+}

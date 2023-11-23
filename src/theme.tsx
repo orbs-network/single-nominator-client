@@ -12,7 +12,7 @@ import { DefaultTheme, ThemeProvider } from "styled-components";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-const blue = "#0098E9";
+export const blue = "#0098E9";
 
 
 const lightTheme: DefaultTheme = {

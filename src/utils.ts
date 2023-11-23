@@ -29,3 +29,5 @@ export const goToTONScanContractUrl = (address?: string) => {
   if (!address) return "";
   return `https://tonscan.org/address/${address}`;
 };
+
+

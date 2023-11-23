@@ -1,11 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Input, Page, TxError, TxSuccess } from "components";
-import React, { useMemo, useState } from "react";
+import {
+  Input,
+  ModalErrorContent,
+  Page,
+} from "components";
+import React, { useCallback, useMemo } from "react";
 import { Container, InputsContainer, SubmitButton } from "styles";
 import { useForm, Controller } from "react-hook-form";
 import { isTonAddress, parseFormInputError } from "utils";
 import { useWithdrawTx } from "hooks";
-import { useNavigate } from "react-router-dom";
+import { Modal } from "antd";
 
 const useInputs = (isCustomAmount: boolean) => {
   return useMemo(() => {
@@ -52,57 +56,22 @@ type FormValues = {
 };
 
 function WithdrawPage() {
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
-
   return (
     <Page title="Withdraw">
       <Container>
-        {error ? (
-          <Error error={error} />
-        ) : success ? (
-          <Success />
-        ) : (
-          <Form setSuccess={() => setSuccess(true)} setError={setError} />
-        )}{" "}
+        <Form />
       </Container>
     </Page>
   );
 }
 
-const Error = ({ error }: { error: string }) => {
-  return (
-    <TxError
-      btnText="Try again"
-      text={error}
-      onClick={() => window.location.reload()}
-    />
-  );
-};
-
-const Success = () => {
-  const navigate = useNavigate();
-  return (
-    <TxSuccess
-      text="Withdrawn successfully"
-      btnText="Home"
-      onClick={() => navigate("/")}
-    />
-  );
-};
-
-const Form = ({
-  setError,
-  setSuccess,
-}: {
-  setError: (value: string) => void;
-  setSuccess: () => void;
-}) => {
+const Form = () => {
   const {
     handleSubmit,
     formState: { errors },
     control,
     watch,
+    reset,
   } = useForm({
     mode: "onSubmit",
     reValidateMode: "onChange",
@@ -113,12 +82,30 @@ const Form = ({
 
   const inputs = useInputs(isCustomAmount);
 
+  const error = useCallback(() => {
+    Modal.error({
+      title: "Withdrawal failed",
+      content: <ModalErrorContent />,
+    });
+  }, []);
+
+  const success = useCallback(() => {
+    Modal.success({
+      title: "Withdrawal successful",
+      okText: 'Close'
+    });
+  }
+  , []);
+
   const onSubmit = (data: FormValues) => {
     mutate({
       address: data.address,
       amount: isCustomAmount ? Number(data.amount) : undefined,
-      onSuccess: setSuccess,
-      onError: setError,
+      onSuccess: () => {
+       success();
+        reset();
+      },
+      onError: error,
     });
   };
 

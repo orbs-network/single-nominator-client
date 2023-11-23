@@ -1,11 +1,15 @@
 import { transferFunds } from "helpers/transfer-funds";
 import { withdraw } from "helpers/withdraw";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useGetSender } from "./common";
 import { changeValidator, roles } from "helpers/change-validator";
 import { deploy } from "helpers/deploy";
 import { isTonAddress } from "utils";
-import { getBalance, isMatchSingleNominatorCodeHash } from "helpers/util";
+import {
+  getBalance,
+  isEqualAddresses,
+  isMatchSingleNominatorCodeHash,
+} from "helpers/util";
 import { fromNano } from "ton-core";
 
 export const useWithdrawTx = () => {
@@ -17,7 +21,7 @@ export const useWithdrawTx = () => {
     }: {
       address: string;
       amount?: number;
-      onSuccess?: () => void;
+      onSuccess?: (value?: string) => void;
       onError?: (value: string) => void;
     }) => {
       return withdraw(getSender(), address, amount);
@@ -165,15 +169,16 @@ export const useRoles = (address?: string) => {
 export const useSingleNominatorBalance = (address?: string) => {
   return useQuery({
     queryFn: async () => {
-      const result = await getBalance(address!) ;
+      const result = await getBalance(address!);
 
       return fromNano(result);
     },
     queryKey: ["useSingleNominatorBalance", address],
     enabled: !!address && isTonAddress(address),
-    refetchInterval: 5_000
+    refetchInterval: 5_000,
   });
 };
+
 
 
 export const useValidateSingleNominator = (address?: string) => {
@@ -186,9 +191,7 @@ export const useValidateSingleNominator = (address?: string) => {
   });
 };
 
-
 export const useValidateRoles = () => {
-  const queyClient = useQueryClient();
   return useMutation({
     mutationFn: async ({
       snAddress,
@@ -201,15 +204,15 @@ export const useValidateRoles = () => {
       onError?: (error: string) => void;
       onSuccess?: () => void;
     }) => {
-      const result = await queyClient.ensureQueryData(["useRoles", snAddress], () => roles(snAddress));
-      console.log({ result });
-      
+      const result = await roles(snAddress);
+
       if (
-        result.owner !== onwerAddress ||
-        result.validatorAddress !== validatorAddress
+        !isEqualAddresses(result?.owner, onwerAddress) ||
+        !isEqualAddresses(result?.validatorAddress, validatorAddress)
       ) {
-        throw new Error("Invalid data");
+        throw new Error("Not match");
       }
+      return true;
     },
     onSuccess: (data, args) => {
       args.onSuccess?.();

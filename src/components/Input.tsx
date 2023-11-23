@@ -39,7 +39,7 @@ export function Input(props: Props) {
   return (
     <StyledContainer>
       {label && <Label>{label}</Label>}
-      <StyledInputContainer $error={!!error}>
+      <StyledInputContainer $noBorder={type === "radio"} $error={!!error}>
         {type === "number" ? (
           <NumericFormat
             value={field.value || ""}
@@ -71,11 +71,16 @@ export function Input(props: Props) {
   );
 }
 
-const StyledInputContainer = styled(RowFlex)<{ $error: boolean }>`
+const StyledInputContainer = styled(RowFlex)<{
+  $error: boolean;
+  $noBorder: boolean;
+}>`
   background-color: ${({ theme }) => theme.colors.container};
   border: 1px solid
-    ${({ $error, theme }) =>
-      $error
+    ${({ $error, theme, $noBorder }) =>
+      $noBorder
+        ? "unset"
+        : $error
         ? "red"
         : theme.dark
         ? theme.colors.border
@@ -100,6 +105,8 @@ const StyledInputContainer = styled(RowFlex)<{ $error: boolean }>`
     font-size: 16px;
     flex: 1;
     font-size: 16px;
+    background-color: transparent;
+    color: ${({ theme }) => theme.text.color};
   }
 `;
 
@@ -129,7 +136,6 @@ const StyledContainer = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
- 
 `;
 
 function RadioInput({ radioOptions, field }: Props) {

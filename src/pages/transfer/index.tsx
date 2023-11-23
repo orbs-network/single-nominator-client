@@ -1,10 +1,10 @@
-import { Input, Page, TxError, TxSuccess } from "components";
-import React, {useState } from "react";
+import { Input, ModalErrorContent, Page } from "components";
+import React, { useCallback } from "react";
 import { Container, InputsContainer, SubmitButton } from "styles";
 import { useForm, Controller } from "react-hook-form";
 import { isTonAddress, parseFormInputError } from "utils";
-import {  useTransferFundsTx, useValidateSingleNominator } from "hooks";
-import { useNavigate } from "react-router-dom";
+import { useTransferFundsTx, useValidateSingleNominator } from "hooks";
+import { Modal } from "antd";
 
 const inputs = [
   {
@@ -30,60 +30,23 @@ type FormValues = {
   amount: string;
 };
 
-
-
 function TransferPage() {
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
-
   return (
     <Page title="Deposit">
       <Container>
-        {error ? (
-          <Error error={error} />
-        ) : success ? (
-          <Success />
-        ) : (
-          <Form setError={setError} setSuccess={() => setSuccess(true)} />
-        )}{" "}
+        <Form />
       </Container>
     </Page>
   );
 }
 
-const Error = ({ error }: { error: string}) => {
-  return (
-    <TxError
-      btnText="Try again"
-      text={error}
-      onClick={() => window.location.reload()}
-    />
-  );
-};
-
-const Success = () => {
-  const navigate = useNavigate();
-  return (
-    <TxSuccess
-      text="Funds successfully transferred!"
-      btnText="Home"
-      onClick={() => navigate("/")}
-    />
-  );
-};
-
-const Form = ({
-  setError,
-  setSuccess,
-}: {
-  setError: (value: string) => void;
-  setSuccess: () => void;
-}) => {
+const Form = () => {
   const {
     control,
     handleSubmit,
     formState: { errors },
-    watch
+    watch,
+    reset,
   } = useForm({
     mode: "onSubmit",
     reValidateMode: "onChange",
@@ -96,12 +59,30 @@ const Form = ({
   const { data: isSNAddress, isLoading: isSNAddressLoading } =
     useValidateSingleNominator(snAddress);
 
+  const error = useCallback(() => {
+    Modal.error({
+      title: "Deposit failed",
+      content: <ModalErrorContent />,
+      okText: "Close",
+    });
+  }, []);
+
+  const success = useCallback(() => {
+    Modal.success({
+      title: "Funds successfully deposited!",
+      okText: "Close",
+    });
+  }, []);
+
   const onSubmit = (data: FormValues) => {
     mutate({
       address: data.address,
       amount: data.amount,
-      onSuccess: setSuccess,
-      onError: setError,
+      onSuccess: () => {
+        success();
+        reset();
+      },
+      onError: error,
     });
   };
 

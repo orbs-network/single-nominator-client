@@ -1,7 +1,6 @@
 import { ColumnFlex, Typography } from "styles";
 import styled from "styled-components";
-import { lazy, Suspense } from "react";
-import { Button } from "./Button";
+import { lazy, ReactNode, Suspense } from "react";
 
 const AiFillCheckCircle = lazy(() =>
   import("react-icons/ai").then((mod) => ({ default: mod.AiFillCheckCircle }))
@@ -9,13 +8,11 @@ const AiFillCheckCircle = lazy(() =>
 
 
 export const TxSuccess = ({
-  onClick,
   text,
-  btnText,
+  button,
 }: {
-  onClick: () => void;
   text: string;
-  btnText: string;
+  button?: ReactNode;
 }) => {
   return (
     <Container>
@@ -23,7 +20,7 @@ export const TxSuccess = ({
         <SuccessIcon />
       </Suspense>
       <Text>{text}</Text>
-      <Button onClick={onClick}>{btnText}</Button>
+      {button}
     </Container>
   );
 };
@@ -36,7 +33,7 @@ const SuccessIcon = styled(AiFillCheckCircle)`
 const Text = styled(Typography)`
   width: 100%;
   text-align: center;
-  font-size: 15px;
+  font-size: 17px;
   line-height: 22px;
 `;
 
