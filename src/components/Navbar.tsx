@@ -12,8 +12,6 @@ const BsGithub = lazy(() =>
 );
 
 
-
-
 const BiSun = lazy(() =>
   import("react-icons/bi").then((module) => ({ default: module.BiSun }))
 );
