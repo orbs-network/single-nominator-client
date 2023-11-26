@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ColumnFlex,
@@ -9,7 +9,7 @@ import {
 } from "styles";
 import styled from "styled-components";
 import { Routes } from "config";
-import { Button, Page } from "components";
+import { Button, ModalErrorContent, Page } from "components";
 
 import TransferImg from "assets/images/transfer.svg";
 import WithdrawImg from "assets/images/withdraw.svg";
@@ -21,6 +21,7 @@ import WithdrawDarkImg from "assets/images/withdraw-dark.svg";
 import ChangeValidatorDarkImg from "assets/images/change-validator-dark.svg";
 import DeploySingleNominatorDarkImg from "assets/images/deploy-single-nominator-dark.svg";
 import { useThemeContext } from "theme";
+import { Modal } from "antd";
 
 interface Route {
   title: string;
@@ -119,6 +120,9 @@ const SectionRoutes = styled(RowFlex)`
 
 const RouteComponent = ({ route }: { route: Route }) => {
   const navigate = useNavigate();
+
+
+  
   return (
     <StyledNavigation key={route.path}>
       <ColumnFlex $gap={20} style={{height:'100%'}}>

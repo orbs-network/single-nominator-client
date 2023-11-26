@@ -203,3 +203,30 @@ table {
 .ant-modal-confirm-btns .ant-btn-primary{
   background: #0098E9;
 }
+
+.dark .ant-modal-content{
+  background: #1D1D1D;
+  
+}
+
+.dark .ant-modal-content span {
+  color: white;
+}
+.dark .ant-modal-content p {
+  color: white;
+}
+
+.ant-modal-confirm-title {
+  font-size: 19px!important;
+}
+.ant-modal-content .anticon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.ant-modal-content .ant-modal-confirm-content * {
+  font-size: 16px;
+}
+.ant-modal-confirm-btns{
+  margin-top: 30px!important;
+}

@@ -14,7 +14,6 @@ import { persist } from "zustand/middleware";
 
 export const blue = "#0098E9";
 
-
 const lightTheme: DefaultTheme = {
   dark: false,
   colors: {
@@ -39,7 +38,7 @@ const darkTheme: DefaultTheme = {
     container: "#222830",
     border: "rgba(255, 255, 255, 0.2)",
     success: "#00C08B",
-    error:"#FF3333"
+    error: "#FF3333",
   },
   text: {
     color: "rgba(255, 255, 255, 0.8)",
@@ -94,6 +93,12 @@ const Theme = ({ children }: { children: ReactNode }) => {
         theme: darkMode ? THEME.DARK : THEME.LIGHT,
       },
     });
+
+    if (darkMode) {
+      document.body.classList.add("dark");
+    } else {
+      document.body.classList.remove("dark");
+    }
   }, [darkMode, setOptions]);
 
   const toggleTheme = () => {
@@ -102,7 +107,7 @@ const Theme = ({ children }: { children: ReactNode }) => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Context.Provider value={{ toggleTheme, darkMode}}>
+      <Context.Provider value={{ toggleTheme, darkMode }}>
         {children}
       </Context.Provider>
     </ThemeProvider>

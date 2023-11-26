@@ -10,15 +10,14 @@ import { blue, useThemeContext } from "theme";
 
 function App() {
   const { darkMode } = useThemeContext();
+
   return (
     <ConfigProvider
-      
       theme={{
-       token: {
-        colorPrimary: blue,
-       },
+        token: {
+          colorPrimary: blue,
+        },
         algorithm: darkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
-        
       }}
     >
       <StyledApp>

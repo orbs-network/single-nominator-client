@@ -1,18 +1,23 @@
 import { TELERGAM_SUPPORT } from 'consts';
 import { styled } from 'styled-components';
 import { blue } from 'theme';
-import { FaTelegramPlane } from "react-icons/fa";
 
 export function ModalErrorContent({message}: {message?: string}) {
+
+  const link = (
+    <SupportLink href={TELERGAM_SUPPORT} target="_blank">
+      Get support on telegram
+    </SupportLink>
+  );
   return (
     <Container>
-      {message && <Text>{message}</Text>}
-      <SupportLink>
-        Ask us on{" "}
-        <a href={TELERGAM_SUPPORT} target="_blank">
-          telegram <FaTelegramPlane />
-        </a>
-      </SupportLink>
+      {message ? (
+        <Text>
+          {message} {link}
+        </Text>
+      ) : (
+        link
+      )}
     </Container>
   );
 }
@@ -24,27 +29,21 @@ const Container = styled('div')`
 `
 
 
-const SupportLink = styled('p')`
+const SupportLink = styled("a")`
   font-size: 14px;
-  
-  a {
-    color: ${blue};
-    text-decoration: none;
-    svg {
-      position: relative;
-      top: 2px;
-    }
-    &:hover {
-      text-decoration: underline;
-    }
+  color: ${blue};
+  text-decoration: underline;
+  svg {
+    position: relative;
+    top: 2px;
   }
 `;
 
 
 
-const Text = styled('p')`
+const Text = styled("p")`
   width: 100%;
-  text-align: center;
+  text-align: left;
   font-size: 15px;
   line-height: 22px;
 `;

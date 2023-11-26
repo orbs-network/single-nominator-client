@@ -113,7 +113,6 @@ const Form = () => {
           );
         })}
         <SubmitButton
-          disabled={!isSNAddress || isSNAddressLoading}
           connectionRequired
           isLoading={isLoading}
           type="submit"
