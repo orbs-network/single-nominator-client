@@ -134,7 +134,7 @@ export const useVerifySNAddress = () => {
       snAddress,
     }: {
       snAddress: string;
-      onSuccess: () => void;
+      onSuccess?: () => void;
       onError?: (value: string) => void;
     }) => {
       const result = await isMatchSingleNominatorCodeHash(snAddress);
@@ -145,7 +145,7 @@ export const useVerifySNAddress = () => {
     },
     {
       onSuccess: (result, args) => {
-        args.onSuccess();
+        args.onSuccess?.();
       },
       onError: (error, args) => {
         if (error instanceof Error) {
@@ -170,7 +170,6 @@ export const useSingleNominatorBalance = (address?: string) => {
   return useQuery({
     queryFn: async () => {
       const result = await getBalance(address!);
-
       return fromNano(result);
     },
     queryKey: ["useSingleNominatorBalance", address],

@@ -147,7 +147,7 @@ function RadioInput({ radioOptions, field }: Props) {
             <StyledRadio
               {...field}
               type="radio"
-              value={field.value || ""}
+              value={field.value}
               onChange={() => field.onChange(option.value)}
             />
             <Typography>{option.title}</Typography>

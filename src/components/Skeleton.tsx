@@ -2,7 +2,7 @@ import React from "react";
 import styled, { keyframes } from "styled-components";
 
 export function Skeleton({ className }: { className?: string }) {
-  return <Container className={className} />;
+  return <Container className={`${className} skeleton`} />;
 }
 
 export default Skeleton;

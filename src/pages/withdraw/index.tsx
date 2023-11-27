@@ -1,14 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  Input,
-  ModalErrorContent,
-  Page,
-} from "components";
+import { Input, ModalErrorContent, Page } from "components";
 import React, { useCallback, useMemo } from "react";
 import { Container, InputsContainer, SubmitButton } from "styles";
 import { useForm, Controller } from "react-hook-form";
 import { isTonAddress, parseFormInputError } from "utils";
-import { useWithdrawTx } from "hooks";
+import { useVerifySNAddress, useWithdrawTx } from "hooks";
 import { Modal } from "antd";
 
 const useInputs = (isCustomAmount: boolean) => {
@@ -81,6 +77,7 @@ const Form = () => {
   const isCustomAmount = watch("customAmount") === "custom";
 
   const inputs = useInputs(isCustomAmount);
+  const { mutateAsync, isLoading: verifyLoading } = useVerifySNAddress();
 
   const error = useCallback(() => {
     Modal.error({
@@ -91,18 +88,30 @@ const Form = () => {
 
   const success = useCallback(() => {
     Modal.success({
-      title: "Withdrawal successful",
-      okText: 'Close'
+      title: 'Withdrawal successful',
+      okText: "Close",
     });
-  }
-  , []);
+  }, []);
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = async (data: FormValues) => {
+    try {
+      await mutateAsync({ snAddress: data.address });
+    } catch (error) {
+      Modal.error({
+        title: "Withdrawal failed",
+        content: (
+          <ModalErrorContent message="Not a valid single nominator address" />
+        ),
+      });
+
+      return;
+    }
+
     mutate({
       address: data.address,
       amount: isCustomAmount ? Number(data.amount) : undefined,
       onSuccess: () => {
-       success();
+        success();
         reset();
       },
       onError: error,
@@ -138,7 +147,11 @@ const Form = () => {
           );
         })}
 
-        <SubmitButton connectionRequired isLoading={isLoading} type="submit">
+        <SubmitButton
+          connectionRequired
+          isLoading={isLoading || verifyLoading}
+          type="submit"
+        >
           Withdraw
         </SubmitButton>
       </InputsContainer>

@@ -8,22 +8,25 @@ import {
   Stepper,
   TxSuccess,
 } from "components";
-import { ColumnFlex, InputsContainer, SubmitButton, Typography } from "styles";
+import { ColumnFlex, InputsContainer, SubmitButton } from "styles";
 import { makeElipsisAddress, parseFormInputError } from "utils";
 import { Controller, useForm } from "react-hook-form";
-import { CSVLink } from "react-csv";
+import { Skeleton } from "antd";
+
+const SANITY_STEP_MIN_AMOUNT = 4.8;
 
 import {
   useDeploySingleNominatorTx,
   useRoles,
   useSingleNominatorBalance,
+  useTransferFundsTx,
   useValidateRoles,
   useVerifySNAddress,
   useWithdrawTx,
 } from "hooks";
-import { FormValues, inputs, useStore } from "./store";
+import { FormValues, inputs, Steps, useStore } from "./store";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { StyledAddresses, StyledWithdrawActions } from "./styles";
+import { StyledAddresses } from "./styles";
 import { ZERO_ADDR } from "consts";
 import { useTonAddress } from "@tonconnect/ui-react";
 import { Alert, Modal } from "antd";
@@ -31,8 +34,20 @@ import { getBalance, isEqualAddresses } from "helpers/util";
 import { showSuccessToast } from "toasts";
 import { useNavigate } from "react-router-dom";
 import { styled } from "styled-components";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fromNano } from "ton-core";
+import axios from "axios";
+import { DownloadFilesStep } from "./DownloadFilesStep";
+
+const withdrawError = (message: string, title?: string) => {
+  const showError = message.indexOf("single nominator balance") > -1;
+
+  Modal.error({
+    title: title || "Withdraw failed",
+    content: <ModalErrorContent message={showError ? message : ""} />,
+    okText: "Close",
+  });
+};
 
 export const Addresses = () => {
   const { ownerAddress, validatorAddress, snAddress } = useStore();
@@ -140,7 +155,7 @@ const FirstStep = () => {
   );
 };
 
-const SecondStep = () => {
+const DesployStep = () => {
   const { ownerAddress, validatorAddress, nextStep, setFromValues } =
     useStore();
   const { mutate, isLoading } = useDeploySingleNominatorTx();
@@ -280,184 +295,242 @@ const VerifyCodeHashStep = () => {
   );
 };
 
-const DownloadCSV = () => {
-  const navigate = useNavigate();
-  const { snAddress, ownerAddress, validatorAddress, reset } = useStore();
-  const [downloaded, setDownloaded] = useState(false);
-  const data = useMemo(() => {
-    return [
-      ["single nominator address", "owner address", "validator address"],
-      [snAddress, ownerAddress, validatorAddress],
-    ];
-  }, [ownerAddress, snAddress, validatorAddress]);
-
-  if (downloaded) {
-    return (
-      <Button
-        style={{ width:'auto' }}
-        onClick={() => {
-          navigate("/");
-          reset();
-        }}
-      >
-        Home
-      </Button>
-    );
-  }
-  return (
-    <CSVLink
-      data={data}
-      filename="single-nominator-info.csv"
-      onClick={() => setDownloaded(true)}
-    >
-      <Button>Download CSV</Button>
-    </CSVLink>
-  );
-};
-
 const SuccessStep = () => {
+  const { reset } = useStore();
+  const navigate = useNavigate();
+
+  const onClick = () => {
+    reset();
+    navigate("/");
+  };
   return (
     <Stepper.Step>
       <Stepper.StepTitle>Success</Stepper.StepTitle>
       <TxSuccess
         text="Successfully deployed single nominator"
-        button={<DownloadCSV />}
+        button={<Button onClick={onClick}>Home</Button>}
       />
     </Stepper.Step>
   );
 };
 
-const useValidateSingleNominatorBalance = () => {
-  const { snAddress, nextStep } = useStore();
-  return useMutation(
-    async () => {
-      const balance = fromNano(await getBalance(snAddress!));
-      if (!withdrawValidation(balance)) {
-        throw new Error(
-          `Single nominator balance is ${Number(balance).toFixed(
-            2
-          )} TON, you must withdraw at least ${(
-            Number(balance) - 2
-          ).toFixed(0)} TON to complete this step`
-        );
-      }
-      return true;
-    },
-    {
-      onSuccess: nextStep,
-      onError: (error: Error) => {
-        Modal.error({
-          title: error?.message,
-          content: <ModalErrorContent />,
-          okText: "Close",
-        });
-      },
-    }
-  );
-};
+const validateSanityTestSNBalance = async (
+  snAddress: string,
+  forceDeposit?: boolean
+) => {
+  const balance = fromNano(await getBalance(snAddress));
+  if (forceDeposit) {
+    throw new Error(
+      `You must deposit ${parseFloat(
+        (5 - Number(balance)).toFixed(2)
+      )} TON to single nominator`
+    );
+  }
 
-const StyledValidateWithdrawBtn = styled(SubmitButton)({
-  marginTop: 40,
-});
-const ValidateWithdrawBtn = () => {
-  const { mutate, isLoading } = useValidateSingleNominatorBalance();
-
-  return (
-    <ColumnFlex $gap={20}>
-      <StyledValidateWithdrawBtn isLoading={isLoading} onClick={mutate}>
-        Check balance
-      </StyledValidateWithdrawBtn>
-      <Typography style={{ fontSize: 13, lineHeight: "normal" }}>
-        In order to successfully complete this step, single nominator balance
-        must be less than 2 TON{" "}
-      </Typography>
-    </ColumnFlex>
-  );
+  if (!withdrawValidation(balance)) {
+    throw new Error(
+      `Sanity test cannot be completed because single nominator balance is ${Number(
+        balance
+      ).toFixed(2)} TON, you must withdraw at least ${(
+        Number(balance) - 2
+      ).toFixed(0)} TON to complete this step`
+    );
+  }
+  return true;
 };
 
 const withdrawValidation = (amount?: string | number) => {
-  return !amount ? false : Number(amount) <= 2;
-};
-
-const useCheckIfWithrawedManually = () => {
-  const { snAddress, nextStep } = useStore();
-  const { data: balance } = useSingleNominatorBalance(snAddress!);
-  const isOwner = useIsOwner();
-
-  useEffect(() => {
-    if (withdrawValidation(balance) && !isOwner) {
-      nextStep();
-    }
-  }, [balance, nextStep, isOwner]);
+  return Number(amount || 0) <= 2;
 };
 
 const useIsOwner = () => {
   const { snAddress } = useStore();
-
-  const owner = useRoles(snAddress).data?.owner;
+  const { data, isLoading } = useRoles(snAddress);
+  const owner = data?.owner;
   const tonAddress = useTonAddress();
 
-  return useMemo(
-    () => isEqualAddresses(tonAddress, owner),
-    [tonAddress, owner]
-  );
+  return useMemo(() => {
+    return {
+      isOwner: isEqualAddresses(tonAddress, owner),
+      isLoading,
+    };
+  }, [tonAddress, owner, isLoading]);
 };
 
 const WITHDRAW_STEP_AMOUNT = 3;
-export const SanityTestStep = () => {
-  const { mutate: withdraw, isLoading: withdrawLoading } = useWithdrawTx();
-  const { nextStep, snAddress } = useStore();
+
+const SanityTestStepNotOwner = () => {
+  const { snAddress, nextStep } = useStore();
   const tonAddress = useTonAddress();
+  const [allowWithdraw, setAllowWithdraw] = useState(false);
+  const { transfer, isLoading: transferLoading } = useSanityTestTransfer();
 
-  const isOwner = useIsOwner();
+  const { data: balance = "", isLoading: balanceLoading } =
+    useSingleNominatorBalance(snAddress!);
 
-  useCheckIfWithrawedManually();
+  useEffect(() => {
+    setAllowWithdraw(Number(balance) >= WITHDRAW_STEP_AMOUNT);
+  }, [balance]);
 
-  const error = useCallback((message: string) => {
-    const showError = message.indexOf("Single nominator balance") > -1;
+  useQuery({
+    queryFn: async () => {
+      if (await validateSanityTestSNBalance(snAddress)) {
+        nextStep();
+      }
+      return true;
+    },
+    enabled: !!snAddress && !!allowWithdraw,
+    queryKey: ["validateSingleNominatorBalance", snAddress, balance],
+  });
 
-    Modal.error({
-      title: "Withdraw failed",
-      content: <ModalErrorContent message={showError ? message : ""} />,
-      okText: "Close",
+  if (balanceLoading) {
+    return <Skeleton />;
+  }
+
+  return (
+    <>
+      <SanityTestStepContent />
+      <StyledSanityTestStepContent>
+        <ColumnFlex>
+          <StyledAlert
+            message={`The connected wallet (${makeElipsisAddress(
+              tonAddress
+            )}) is not the owner of the single nominator contract. In order to complete the deployment proccess, it is crucial to test withdraw funds in order to prove access to the funds. You can connect with the onwer address and complete the sanity test, or withdraw funds using the owner wallet`}
+            type="error"
+          />
+          {!allowWithdraw && (
+            <SubmitButton
+              connectionRequired
+              isLoading={transferLoading}
+              onClick={transfer}
+            >
+              Deposit {getAmountToDepositUI(balance)} TON
+            </SubmitButton>
+          )}
+        </ColumnFlex>
+      </StyledSanityTestStepContent>
+    </>
+  );
+};
+
+const useSanityTestTransfer = () => {
+  const { snAddress } = useStore();
+  const { mutate: transfer, isLoading: transferLoading } = useTransferFundsTx();
+
+  const { data: balance } = useSingleNominatorBalance(snAddress!);
+  const queryClient = useQueryClient();
+
+  const onTransfer = useCallback(async () => {
+    const error = () => {
+      Modal.error({
+        title: "Deposit failed",
+        content: <ModalErrorContent />,
+        okText: "Close",
+      });
+    };
+
+    transfer({
+      amount: (5 - Number(balance)).toString(),
+      address: snAddress!,
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: ["useSingleNominatorBalance", snAddress],
+        });
+        showSuccessToast("Funds deposited");
+      },
+      onError: error,
     });
-  }, []);
+  }, [transfer, balance, snAddress, queryClient]);
 
-  const onWithdraw = () =>
+  return {
+    transfer: onTransfer,
+    isLoading: transferLoading,
+  };
+};
+
+const getAmountToDepositUI = (balance?: string) => {
+  return parseFloat((5 - Number(balance)).toFixed(2));
+};
+
+const SanityTestStepOwner = () => {
+  const { nextStep, snAddress } = useStore();
+  const { mutate: withdraw, isLoading: withdrawLoading } = useWithdrawTx();
+  const { transfer, isLoading: transferLoading } = useSanityTestTransfer();
+  const { data: balance } = useSingleNominatorBalance(snAddress!);
+
+  const onWithdraw = useCallback(() => {
     withdraw({
       address: snAddress,
       amount: WITHDRAW_STEP_AMOUNT,
-      onError: error,
+      onError: withdrawError,
       onSuccess: () => {
         showSuccessToast("Funds withdrawn");
         nextStep();
       },
     });
+  }, [withdraw, snAddress, nextStep]);
 
+  const allowWithdraw = useMemo(() => {
+    return Number(balance) > SANITY_STEP_MIN_AMOUNT;
+  }, [balance]);
+
+  if (!balance) {
+    return <Skeleton />;
+  }
   return (
-    <Stepper.Step>
+    <>
       <Stepper.StepTitle>Sanity test withdrawal</Stepper.StepTitle>
       <Stepper.StepSubtitle>
         To make sure the Owner / admin was set correctly and can withdraw funds
         from single-nominator, we recommend doing a withdrawal test with a small
         amount of {WITHDRAW_STEP_AMOUNT} TON.
       </Stepper.StepSubtitle>
-      {isOwner && (
-        <StyledWithdrawActions>
-          <Button isLoading={withdrawLoading} onClick={onWithdraw}>
-            Withdraw {WITHDRAW_STEP_AMOUNT} TON
-          </Button>
-        </StyledWithdrawActions>
+      <StyledSanityTestStepContent>
+        <SubmitButton
+          connectionRequired
+          isLoading={withdrawLoading || transferLoading}
+          onClick={allowWithdraw ? onWithdraw : transfer}
+        >
+          {allowWithdraw
+            ? ` Withdraw ${WITHDRAW_STEP_AMOUNT} TON`
+            : `Deposit ${getAmountToDepositUI(balance)} TON`}
+        </SubmitButton>
+      </StyledSanityTestStepContent>
+    </>
+  );
+};
+
+const StyledSanityTestStepContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const SanityTestStepContent = () => {
+  return (
+    <>
+      <Stepper.StepTitle>Sanity test withdrawal</Stepper.StepTitle>
+      <Stepper.StepSubtitle>
+        To make sure the Owner / admin was set correctly and can withdraw funds
+        from single-nominator, we recommend doing a withdrawal test with a small
+        amount of {WITHDRAW_STEP_AMOUNT} TON.
+      </Stepper.StepSubtitle>
+    </>
+  );
+};
+
+export const SanityTestStep = () => {
+  const { isOwner, isLoading } = useIsOwner();
+
+  return (
+    <Stepper.Step>
+      {isLoading ? (
+        <Skeleton />
+      ) : isOwner ? (
+        <SanityTestStepOwner />
+      ) : (
+        <SanityTestStepNotOwner />
       )}
-      {!isOwner && (
-        <StyledAlert
-          message={`The connected wallet (${makeElipsisAddress(
-            tonAddress
-          )}) is not the owner of the single nominator contract. In order to complete the deployment proccess, it is crucial to test withdraw funds in order to prove access to the funds. You can connect with the onwer address and complete the sanity test, or withdraw funds using the owner wallet`}
-          type="error"
-        />
-      )}
-      {!isOwner && <ValidateWithdrawBtn />}
     </Stepper.Step>
   );
 };
@@ -473,7 +546,7 @@ const steps = [
   },
   {
     title: "Deploy",
-    component: <SecondStep />,
+    component: <DesployStep />,
   },
   {
     title: "Verify Data",
@@ -486,6 +559,10 @@ const steps = [
   {
     title: "Sanity test",
     component: <SanityTestStep />,
+  },
+  {
+    title: "Download files",
+    component: <DownloadFilesStep />,
   },
   {
     title: "",

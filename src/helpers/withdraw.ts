@@ -25,9 +25,9 @@ export async function withdraw(
 
   if (Number(_amount) > parseFloat(fromNano(balance))) {
     throw new Error(
-      `Single nominator balance (${parseFloat(fromNano(balance)).toFixed(
-        2
-      )} TON) is less than ${_amount} TON`
+      `Sanity test cannot be completed because single nominator balance (${parseFloat(
+        fromNano(balance)
+      ).toFixed(2)} TON) is less than ${_amount} TON`
     );
   }
 

@@ -11,7 +11,7 @@ import {
 import { ColumnFlex, SubmitButton, Typography } from "styles";
 import { useForm, Controller } from "react-hook-form";
 import { isTonAddress, parseFormInputError } from "utils";
-import { useChangeValidatorTx, useRoles } from "hooks";
+import { useChangeValidatorTx, useRoles, useVerifySNAddress } from "hooks";
 import { useTonAddress } from "@tonconnect/ui-react";
 import styled from "styled-components";
 import { useCallback, useMemo } from "react";
@@ -52,8 +52,18 @@ const SnAddress = () => {
       snAddress,
     },
   });
+  const { mutateAsync, isLoading } = useVerifySNAddress();
+  const onSubmit = async (data: { snAddress: string }) => {
+   try {
+     await mutateAsync({ snAddress: data.snAddress });
+   } catch (error) {
+    Modal.error({
+      title: "Error",
+      content: <ModalErrorContent message='Not a valid single nominator address' />,
+    })
+    return 
+   }
 
-  const onSubmit = (data: { snAddress: string }) => {
     setFromValues({
       snAddress: data.snAddress,
     });
@@ -89,7 +99,7 @@ const SnAddress = () => {
               );
             }}
           />
-          <SubmitButton connectionRequired type="submit">
+          <SubmitButton connectionRequired type="submit" isLoading={isLoading}>
             Next
           </SubmitButton>
         </ColumnFlex>
@@ -106,8 +116,10 @@ const Roles = () => {
   const owner = roles?.owner;
 
   const invalidOnwer = useMemo(() => {
-    return isEqualAddresses(owner, tonAddress);
+    if(!owner) return false
+    return !isEqualAddresses(owner, tonAddress);
   }, [tonAddress, owner]);
+  
 
   return (
     <Stepper.Step>
@@ -171,9 +183,20 @@ const NewValidatorAddress = () => {
   }: {
     newValidatorAddress: string;
   }) => {
-    setFromValues({
-      newValidatorAddress,
-    });
+
+
+    if (isEqualAddresses(newValidatorAddress, data!.validatorAddress!)) {
+      Modal.error({
+        title: "Error",
+        content: (
+          <ModalErrorContent message="New validator address is the same as the old one" />
+        ),
+      });
+      return;
+    }
+      setFromValues({
+        newValidatorAddress,
+      });
     mutate({
       address: snAddress,
       newAddress: newValidatorAddress,
@@ -241,7 +264,6 @@ const Success = () => {
   const { reset } = useStore();
   return (
     <Stepper.Step>
-      <Stepper.StepTitle>Success</Stepper.StepTitle>
       <TxSuccess
         button={
           <Button
@@ -253,7 +275,7 @@ const Success = () => {
             Home
           </Button>
         }
-        text="Validator changed"
+        text='Validator address has been changed successfully'
       />
     </Stepper.Step>
   );

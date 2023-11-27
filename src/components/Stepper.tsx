@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-refresh/only-export-components */
 import { ReactElement } from "react";
 import { BsCheckLg } from "react-icons/bs";
 
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { Container, MOBILE_MEDIA_QUERY, Typography } from "styles";
 
 interface ISteps {
@@ -17,7 +19,6 @@ interface Props {
 }
 
 export function Stepper({ steps, currentStep, header, setStep }: Props) {
-  const Component = steps[currentStep].component;
 
   return (
     <StyledContainer>
@@ -34,37 +35,55 @@ export function Stepper({ steps, currentStep, header, setStep }: Props) {
               if (finished) {
                 setStep(index);
               }
-            }
+            };
 
             return (
-              <Step key={index} onClick={onSetStep}>
+              <StyledStep key={index} onClick={onSetStep}>
                 <Indicator $done={finished}>
                   {finished && <BsCheckLg style={{ color: "white" }} />}
                   {isCurrent && <Dot />}
                 </Indicator>
                 <Typography>{step.title}</Typography>
-              </Step>
+              </StyledStep>
             );
           })}
         </MenuSteps>
       </Menu>
+      {steps.map((step, index) => {
+        if (index !== currentStep) return null;
+        return <StepComponent key={index}>{step.component}</StepComponent>;
+      })}
 
-      <StepComponent>{Component}</StepComponent>
     </StyledContainer>
   );
 }
 
 
+const enter = keyframes`
+  from {opacity: 0;}
+  to {opacity: 1;}
+`;
+
+const StepComponent = ({ children }: { children: React.ReactNode }) => {
+
+  return <StyledStepComponent>{children}</StyledStepComponent>;
+};
+
 const Menu = styled(Container)`
   width: 250px;
+  
   padding: 20px 10px 20px 20px;
   ${MOBILE_MEDIA_QUERY} {
     width: 100%;
   }
 `;
 
-const StepComponent = styled.div`
+const StyledStepComponent = styled.div`
   width: calc(100% - 270px);
+  transition: 0.3s all;
+  opacity: 0;
+  animation: ${enter} 0.2s forwards;
+
   ${MOBILE_MEDIA_QUERY} {
     width: 100%;
   }
@@ -88,7 +107,7 @@ const Dot = styled.div`
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-   background: ${({ theme }) => theme.colors.blue};
+  background: ${({ theme }) => theme.colors.blue};
 `;
 
 const MenuSteps = styled.div`
@@ -120,7 +139,7 @@ const Indicator = styled.div<{ $done: boolean }>`
   }
 `;
 
-const Step = styled.div`
+const StyledStep = styled.div`
   display: flex;
   gap: 10px;
   justify-content: flex-start;
@@ -129,13 +148,12 @@ const Step = styled.div`
   align-items: center;
   padding-left: 45px;
   min-height: 34px;
- 
+
   & p {
     font-size: 14px;
     line-height: 20px;
     flex: 1;
   }
- 
 `;
 
 const StyledContainer = styled.div`
@@ -147,7 +165,6 @@ const StyledContainer = styled.div`
     flex-direction: column;
   }
 `;
-
 
 export const StepContainer = styled(Container)``;
 export const StepTitle = styled.h2`

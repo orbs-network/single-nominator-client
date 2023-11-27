@@ -3,7 +3,7 @@ import React, { useCallback } from "react";
 import { Container, InputsContainer, SubmitButton } from "styles";
 import { useForm, Controller } from "react-hook-form";
 import { isTonAddress, parseFormInputError } from "utils";
-import { useTransferFundsTx, useValidateSingleNominator } from "hooks";
+import { useTransferFundsTx, useVerifySNAddress } from "hooks";
 import { Modal } from "antd";
 
 const inputs = [
@@ -45,19 +45,17 @@ const Form = () => {
     control,
     handleSubmit,
     formState: { errors },
-    watch,
     reset,
   } = useForm({
     mode: "onSubmit",
     reValidateMode: "onChange",
   });
 
-  const snAddress = watch("address");
 
   const { mutate, isLoading } = useTransferFundsTx();
 
-  const { data: isSNAddress, isLoading: isSNAddressLoading } =
-    useValidateSingleNominator(snAddress);
+  const { mutateAsync, isLoading: verifyLoading } = useVerifySNAddress();
+
 
   const error = useCallback(() => {
     Modal.error({
@@ -69,12 +67,24 @@ const Form = () => {
 
   const success = useCallback(() => {
     Modal.success({
-      title: "Funds successfully deposited!",
+      title: "Funds deposited successfully!",
       okText: "Close",
     });
   }, []);
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = async (data: FormValues) => {
+    try {
+      await mutateAsync({ snAddress: data.address });
+    } catch (error) {
+      Modal.error({
+        title: "Deposit failed",
+        content: (
+          <ModalErrorContent message="Not a valid single nominator address" />
+        ),
+      });
+      return 
+    }
+
     mutate({
       address: data.address,
       amount: data.amount,
@@ -114,7 +124,7 @@ const Form = () => {
         })}
         <SubmitButton
           connectionRequired
-          isLoading={isLoading}
+          isLoading={isLoading || verifyLoading}
           type="submit"
         >
           Deposit
