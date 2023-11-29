@@ -16,9 +16,9 @@ import { DEPLOY_VALUE } from "consts";
 const MSG_VALUE = import.meta.env.DEV ? toNano(0.1) : toNano(DEPLOY_VALUE);
 
 async function getDeployCodeAndData(owner: Address, validator: Address) {
-  const stdlibFileResponse = await fetch("src/contracts/stdlib.fc");
+  const stdlibFileResponse = await fetch("/contracts/stdlib.fc");
   const singleNominatorFileResponse = await fetch(
-    "src/contracts/single-nominator.fc"
+    "/contracts/single-nominator.fc"
   );
 
   if (!stdlibFileResponse.ok || !singleNominatorFileResponse.ok) {
@@ -62,6 +62,7 @@ export async function deploy(sender: Sender, owner: string, validator: string) {
     code: singleNominatorCodeAndData?.code,
     data: singleNominatorCodeAndData?.data,
   });
+
   const isDeployed = await client.isContractDeployed(singleNominatorAddress);
   if (isDeployed) {
     return {
