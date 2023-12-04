@@ -60,7 +60,7 @@ export const DownloadFilesStep = () => {
     zip.file("single-nominator-info.csv", csvContent);
 
     zip.generateAsync({ type: "blob" }).then((blob) => {
-      saveAs(blob, "test.zip");
+      saveAs(blob, "mytonctrl-sn-files.zip");
     });
 
     nextStep();
