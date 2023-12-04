@@ -6,7 +6,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   assetsInclude: ["**/*.fif", "**/*.sh"],
-  base: "/single-nominator-client",
+  base: "./",
   server: {
     port: 3000,
   },

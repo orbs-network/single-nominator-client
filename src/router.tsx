@@ -8,36 +8,39 @@ import TransferPage from "pages/transfer";
 import WithdrawPage from "pages/withdraw";
 import { createBrowserRouter } from "react-router-dom";
 
-export const router = createBrowserRouter(
-  [
-    {
-      path: Routes.root,
-      element: <App />,
-      children: [
-        {
-          element: <HomePage />,
-          index: true,
-        },
-        {
-          path: Routes.deposit,
-          element: <TransferPage />,
-        },
-        {
-          path: Routes.withdraw,
-          element: <WithdrawPage />,
-        },
-        {
-          path: Routes.changeValidator,
-          element: <ChangeValidatorPage />,
-        },
-        {
-          path: Routes.deploySingleNominator,
-          element: <DeploySingleNominatorPage />,
-        },
-      ],
-    },
-  ],
+export const router = createBrowserRouter([
   {
-    basename: "/single-nominator-client",
-  }
-);
+    path: Routes.root,
+    element: <App />,
+    children: [
+      {
+        element: <HomePage />,
+        index: true,
+      },
+      {
+        path: Routes.deposit,
+        element: (
+          <TransferPage />
+        ),
+      },
+      {
+        path: Routes.withdraw,
+        element: (
+          <WithdrawPage />
+        ),
+      },
+      {
+        path: Routes.changeValidator,
+        element: (
+          <ChangeValidatorPage />
+        ),
+      },
+      {
+        path: Routes.deploySingleNominator,
+        element: (
+          <DeploySingleNominatorPage />
+        ),
+      },
+    ],
+  },
+]);
