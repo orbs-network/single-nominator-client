@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Stepper } from "components";
 import { SubmitButton } from "styles";
-import file1 from "assets/files/install-pool-scripts.sh";
 import file2 from "assets/files/recover-stake.fif";
 import file3 from "assets/files/validator-elect-signed.fif";
 import file4 from "assets/files/validator-withdraw.fif";
@@ -11,7 +10,6 @@ import { Address } from "ton-core";
 import JSZip from "jszip";
 
 const files = [
-  { name: "install-pool-scripts.sh", file: file1 },
   { name: "recover-stake.fif", file: file2 },
   { name: "validator-elect-signed.fif", file: file3 },
   { name: "validator-withdraw.fif", file: file4 },
