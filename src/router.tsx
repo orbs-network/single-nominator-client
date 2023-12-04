@@ -43,4 +43,6 @@ export const router = createBrowserRouter([
       },
     ],
   },
-]);
+], {
+  basename: '/single-nominator-client'
+});
