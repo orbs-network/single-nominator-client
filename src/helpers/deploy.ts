@@ -17,9 +17,9 @@ const MSG_VALUE = import.meta.env.DEV ? toNano(0.1) : toNano(DEPLOY_VALUE);
 
   
 async function getDeployCodeAndData(owner: Address, validator: Address) {
-  const stdlibFileResponse = await fetch("/contracts/stdlib.fc");
+  const stdlibFileResponse = await fetch("contracts/stdlib.fc");
   const singleNominatorFileResponse = await fetch(
-    "/contracts/single-nominator.fc"
+    "contracts/single-nominator.fc"
   );
 
   console.log({ singleNominatorFileResponse });
