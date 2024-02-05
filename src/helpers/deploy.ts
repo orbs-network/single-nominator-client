@@ -22,6 +22,9 @@ async function getDeployCodeAndData(owner: Address, validator: Address) {
     "/contracts/single-nominator.fc"
   );
 
+  console.log({ singleNominatorFileResponse });
+  
+
   if (!stdlibFileResponse.ok || !singleNominatorFileResponse.ok) {
     console.error("Failed to fetch one or more files.");
     return;
