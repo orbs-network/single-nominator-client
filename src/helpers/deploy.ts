@@ -11,15 +11,15 @@ import { compileFunc } from "@ton-community/func-js";
 import { Buffer } from "buffer";
 import { getClientV2 } from "helpers/client";
 import { waitForContractToBeDeployed } from "./util";
-import { DEPLOY_VALUE } from "consts";
+import { BASE_URL, DEPLOY_VALUE } from "consts";
 
 const MSG_VALUE = import.meta.env.DEV ? toNano(0.1) : toNano(DEPLOY_VALUE);
 
   
 async function getDeployCodeAndData(owner: Address, validator: Address) {
-  const stdlibFileResponse = await fetch("contracts/stdlib.fc");
+  const stdlibFileResponse = await fetch(`${BASE_URL}/contracts/stdlib.fc`);
   const singleNominatorFileResponse = await fetch(
-    "contracts/single-nominator.fc"
+    `${BASE_URL}/contracts/single-nominator.fc`
   );
 
   console.log({ singleNominatorFileResponse });
