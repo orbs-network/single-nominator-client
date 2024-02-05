@@ -454,9 +454,10 @@ const getAmountToDepositUI = (balance?: string) => {
 
 const SanityTestStepOwner = () => {
   const { nextStep, snAddress } = useStore();
+  const { data: balance } = useSingleNominatorBalance(snAddress!);
+
   const { mutate: withdraw, isLoading: withdrawLoading } = useWithdrawTx();
   const { transfer, isLoading: transferLoading } = useSanityTestTransfer();
-  const { data: balance } = useSingleNominatorBalance(snAddress!);
 
   const onWithdraw = useCallback(() => {
     withdraw({
@@ -471,7 +472,7 @@ const SanityTestStepOwner = () => {
   }, [withdraw, snAddress, nextStep]);
 
   const allowWithdraw = useMemo(() => {
-    return balance &&  Number(balance) > SANITY_STEP_MIN_AMOUNT;
+    return balance && Number(balance) > SANITY_STEP_MIN_AMOUNT;
   }, [balance]);
 
   if (!balance) {

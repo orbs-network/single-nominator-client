@@ -45,15 +45,18 @@ export const useTransferFundsTx = () => {
     async (data: {
       address: string;
       amount: string;
-      onSuccess?: () => void;
+      onSuccess?: () => void | Promise<void>;
       onError?: (value: string) => void;
     }) => {
-      return transferFunds(getSender(), data.address, Number(data.amount));
+      const res = await transferFunds(
+        getSender(),
+        data.address,
+        Number(data.amount)
+      );
+      await data.onSuccess?.();
+      return res;
     },
     {
-      onSuccess: (data, args) => {
-        args.onSuccess?.();
-      },
       onError: (error, args) => {
         if (error instanceof Error) {
           args.onError?.(error.message);
@@ -177,8 +180,6 @@ export const useSingleNominatorBalance = (address?: string) => {
     refetchInterval: 5_000,
   });
 };
-
-
 
 export const useValidateSingleNominator = (address?: string) => {
   return useQuery({
