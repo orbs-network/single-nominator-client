@@ -11,6 +11,7 @@ import {
   isMatchSingleNominatorCodeHash,
 } from "helpers/util";
 import { fromNano } from "ton-core";
+import { useCallback } from "react";
 
 export const useWithdrawTx = () => {
   const getSender = useGetSender();
@@ -38,6 +39,7 @@ export const useWithdrawTx = () => {
     }
   );
 };
+
 
 export const useTransferFundsTx = () => {
   const getSender = useGetSender();
@@ -224,3 +226,4 @@ export const useValidateRoles = () => {
     },
   });
 };
+

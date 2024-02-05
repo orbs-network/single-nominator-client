@@ -411,9 +411,27 @@ const SanityTestStepNotOwner = () => {
     </>
   );
 };
+
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+
+export async function waitForBalanceChanges(getBalance: () => Promise<any>) {
+  const balance = await getBalance();
+  
+  for (let i = 0; i < 30; ++i) {
+    // due to swap being fetch and not web3
+
+    await delay(3_000); // to avoid potential rate limiting from public rpc
+    const newBalance= await getBalance();
+    if (newBalance.data !== balance.data) {
+      return newBalance.data;
+    }
+  }
+}
+
+
 const useSanityTestTransfer = () => {
   const { snAddress } = useStore();
   const { mutate: transfer, isLoading: transferLoading } = useTransferFundsTx();
@@ -434,8 +452,7 @@ const useSanityTestTransfer = () => {
       amount: (5 - Number(balance)).toString(),
       address: snAddress!,
       onSuccess: async () => {
-        await delay(3_000);
-        await refetch();
+        await waitForBalanceChanges(refetch);
         showSuccessToast("Funds deposited");
       },
       onError: error,
