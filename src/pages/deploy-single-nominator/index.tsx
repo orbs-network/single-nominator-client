@@ -159,7 +159,7 @@ const DesployStep = () => {
   const { ownerAddress, validatorAddress, nextStep, setFromValues } =
     useStore();
   const { mutate, isLoading } = useDeploySingleNominatorTx();
-
+  console.log('deplying...')
   const error = useCallback(() => {
     Modal.error({
       title: "Deploy failed",
