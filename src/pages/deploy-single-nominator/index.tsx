@@ -416,10 +416,10 @@ const useSanityTestTransfer = () => {
   const { snAddress } = useStore();
   const { mutate: transfer, isLoading: transferLoading } = useTransferFundsTx();
 
-  const { data: balance } = useSingleNominatorBalance(snAddress!);
+  const { data: balance, refetch } = useSingleNominatorBalance(snAddress!);
   const queryClient = useQueryClient();
 
-  const onTransfer = useCallback(async () => {
+  const onTransfer = useCallback(async (onSuccess?: () => void) => {
     const error = () => {
       Modal.error({
         title: "Deposit failed",
@@ -432,9 +432,7 @@ const useSanityTestTransfer = () => {
       amount: (5 - Number(balance)).toString(),
       address: snAddress!,
       onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: ["useSingleNominatorBalance", snAddress],
-        });
+        await refetch();
         showSuccessToast("Funds deposited");
       },
       onError: error,
@@ -462,7 +460,7 @@ const SanityTestStepOwner = () => {
       address: snAddress,
       amount: WITHDRAW_STEP_AMOUNT,
       onError: withdrawError,
-      onSuccess: () => {
+      onSuccess: async () => {
         showSuccessToast("Funds withdrawn");
         nextStep();
       },
