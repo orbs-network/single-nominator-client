@@ -70,6 +70,8 @@ export async function deploy(sender: Sender, owner: string, validator: string) {
       singleNominatorAddress: singleNominatorAddress.toString(),
     };
   }
+
+  
   await sender.send({
     to: singleNominatorAddress,
     value: MSG_VALUE,
