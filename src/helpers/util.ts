@@ -81,7 +81,7 @@ export async function isMatchSingleNominatorCodeHash(
 }
 
 const SINGLE_NOMINATOR_CODE_HASH =
-  "xjonZrValtVP2IwnJ87mP+3f08QvX+Vpg+PkNmB+suU=";
+  "zA05WJ6ywM/g/eKEVmV6O909lTlVrj+Y8lZkqzyQT70="; //v1.1
 
 export async function waitForContractToBeDeployed(
   client: TonClient,
