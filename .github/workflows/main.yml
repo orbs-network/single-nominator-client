@@ -1,4 +1,3 @@
-
 # Build and Deploy to GitHub Pages
 
 name: Build and Deploy
@@ -14,6 +13,10 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-22.04
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     
     permissions:
       contents: read
@@ -39,7 +42,7 @@ jobs:
         run: yarn build
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
-      
+
       - name: Setup Pages 🏗️
         uses: actions/configure-pages@v4
 
